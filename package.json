@@ -1,0 +1,14 @@
+{
+	"name": "com.dvoyni.",
+	"version": "0.1.0",
+	"description": "",
+	"displayName": "",
+	"unity": "2021.3",
+	"author": {
+		"name": "Sergey Dvoynikov",
+   		"email": "s@dvoyni.com",
+   		"url": "https://dvoyni.com/"
+	},
+	"dependencies": {},
+	"keywords": "",
+}
