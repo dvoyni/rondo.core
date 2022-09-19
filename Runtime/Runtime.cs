@@ -92,7 +92,7 @@ namespace Rondo.Core {
         }
 
         private void ApplyMessagesUnsafe() {
-            Mem.Swap();
+            Mem.Swap(); //TODO: Multiple Cmd will cause a memory loss, don't call ApplyMessages immediately
 
             for (var i = 0; i < _messages.Count; i++) {
                 var msg = _messages[i];

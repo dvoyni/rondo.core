@@ -176,7 +176,7 @@ namespace Rondo.Core.Lib.Containers {
         /// </summary>
         public static int Length<TK, TV>(this D<TK, TV> dict)
                 where TK : unmanaged, IComparable<TK> where TV : unmanaged {
-            return dict.Data.GetLength();
+            return dict.Data.Length();
         }
 
         /// <summary>

@@ -13,12 +13,14 @@ namespace Rondo.Core.Lib {
        private readonly IntPtr _arg0;
        private readonly IntPtr _arg1;
        private readonly IntPtr _arg2;
+       private readonly IntPtr _arg3;
 
        public CLf(delegate*<TR> fn) {
            _fn = fn;
            _arg0 = IntPtr.Zero;
            _arg1 = IntPtr.Zero;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 0;
        }
 
@@ -27,6 +29,7 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = IntPtr.Zero;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 1;
        }
 
@@ -35,6 +38,7 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = a1;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 2;
        }
 
@@ -43,7 +47,17 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = a1;
            _arg2 = a2;
+           _arg3 = IntPtr.Zero;
            _arity = 3;
+       }
+
+       public CLf(delegate*<void*, void*, void*, void*, TR> fn, IntPtr a0, IntPtr a1, IntPtr a2, IntPtr a3) {
+           _fn = fn;
+           _arg0 = a0;
+           _arg1 = a1;
+           _arg2 = a2;
+           _arg3 = a3;
+           _arity = 4;
        }
 
        public TR Invoke() {
@@ -56,6 +70,8 @@ namespace Rondo.Core.Lib {
                 return ((delegate*<void*, void*, TR>)_fn)(_arg0.ToPointer(), _arg1.ToPointer());
             case 3:
                 return ((delegate*<void*, void*, void*, TR>)_fn)(_arg0.ToPointer(), _arg1.ToPointer(), _arg2.ToPointer());
+            case 4:
+                return ((delegate*<void*, void*, void*, void*, TR>)_fn)(_arg0.ToPointer(), _arg1.ToPointer(), _arg2.ToPointer(), _arg3.ToPointer());
             default:
                 Assert.Fail("Unsupported closure arity");
                 return default;
@@ -72,11 +88,14 @@ namespace Rondo.Core.Lib {
             if (_arg2 != IntPtr.Zero) {
                 Marshal.FreeHGlobal(_arg2);
             }
+            if (_arg3 != IntPtr.Zero) {
+                Marshal.FreeHGlobal(_arg3);
+            }
         }
 
         public bool Equals(CLf<TR> other) {
 #pragma warning disable CS8909
-            return _fn == other._fn && _arity == other._arity && _arg0 == other._arg0 && _arg1 == other._arg1 && _arg2 == other._arg2;
+            return _fn == other._fn && _arity == other._arity && _arg0 == other._arg0 && _arg1 == other._arg1 && _arg2 == other._arg2 && _arg3 == other._arg3;
 #pragma warning restore CS8909
         }
     }
@@ -121,6 +140,26 @@ namespace Rondo.Core.Lib {
             Buffer.MemoryCopy(&a2, pa2.ToPointer(), sz2, sz2);
             return new CLf<TR>((delegate*<void*, void*, void*, TR>)fn, pa0, pa1, pa2);
         }
+
+        public static CLf<TR> New<A0, A1, A2, A3, TR>(delegate*<A0*, A1*, A2*, A3*, TR> fn,A0 a0, A1 a1, A2 a2, A3 a3)
+                where A0: unmanaged
+                where A1: unmanaged
+                where A2: unmanaged
+                where A3: unmanaged {
+            var sz0 = Mem.SizeOf<A0>();
+            var pa0 = Marshal.AllocHGlobal(sz0);
+            Buffer.MemoryCopy(&a0, pa0.ToPointer(), sz0, sz0);
+            var sz1 = Mem.SizeOf<A1>();
+            var pa1 = Marshal.AllocHGlobal(sz1);
+            Buffer.MemoryCopy(&a1, pa1.ToPointer(), sz1, sz1);
+            var sz2 = Mem.SizeOf<A2>();
+            var pa2 = Marshal.AllocHGlobal(sz2);
+            Buffer.MemoryCopy(&a2, pa2.ToPointer(), sz2, sz2);
+            var sz3 = Mem.SizeOf<A3>();
+            var pa3 = Marshal.AllocHGlobal(sz3);
+            Buffer.MemoryCopy(&a3, pa3.ToPointer(), sz3, sz3);
+            return new CLf<TR>((delegate*<void*, void*, void*, void*, TR>)fn, pa0, pa1, pa2, pa3);
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -130,12 +169,14 @@ namespace Rondo.Core.Lib {
        private readonly IntPtr _arg0;
        private readonly IntPtr _arg1;
        private readonly IntPtr _arg2;
+       private readonly IntPtr _arg3;
 
        public CLa(delegate*<T0, void> fn) {
            _fn = fn;
            _arg0 = IntPtr.Zero;
            _arg1 = IntPtr.Zero;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 0;
        }
 
@@ -144,6 +185,7 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = IntPtr.Zero;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 1;
        }
 
@@ -152,6 +194,7 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = a1;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 2;
        }
 
@@ -160,7 +203,17 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = a1;
            _arg2 = a2;
+           _arg3 = IntPtr.Zero;
            _arity = 3;
+       }
+
+       public CLa(delegate*<T0, IntPtr, IntPtr, IntPtr, IntPtr, void> fn, IntPtr a0, IntPtr a1, IntPtr a2, IntPtr a3) {
+           _fn = fn;
+           _arg0 = a0;
+           _arg1 = a1;
+           _arg2 = a2;
+           _arg3 = a3;
+           _arity = 4;
        }
 
        public void Invoke(T0 p0) {
@@ -176,6 +229,9 @@ namespace Rondo.Core.Lib {
                 break;
             case 3:
                 ((delegate*<T0, void*, void*, void*, void>)_fn)(p0, _arg0.ToPointer(), _arg1.ToPointer(), _arg2.ToPointer());
+                break;
+            case 4:
+                ((delegate*<T0, void*, void*, void*, void*, void>)_fn)(p0, _arg0.ToPointer(), _arg1.ToPointer(), _arg2.ToPointer(), _arg3.ToPointer());
                 break;
             default:
                 Assert.Fail("Unsupported closure arity");
@@ -193,11 +249,14 @@ namespace Rondo.Core.Lib {
             if (_arg2 != IntPtr.Zero) {
                 Marshal.FreeHGlobal(_arg2);
             }
+            if (_arg3 != IntPtr.Zero) {
+                Marshal.FreeHGlobal(_arg3);
+            }
         }
 
         public bool Equals(CLa<T0> other) {
 #pragma warning disable CS8909
-            return _fn == other._fn && _arity == other._arity && _arg0 == other._arg0 && _arg1 == other._arg1 && _arg2 == other._arg2;
+            return _fn == other._fn && _arity == other._arity && _arg0 == other._arg0 && _arg1 == other._arg1 && _arg2 == other._arg2 && _arg3 == other._arg3;
 #pragma warning restore CS8909
         }
     }
@@ -209,12 +268,14 @@ namespace Rondo.Core.Lib {
        private readonly IntPtr _arg0;
        private readonly IntPtr _arg1;
        private readonly IntPtr _arg2;
+       private readonly IntPtr _arg3;
 
        public CLf(delegate*<T0, TR> fn) {
            _fn = fn;
            _arg0 = IntPtr.Zero;
            _arg1 = IntPtr.Zero;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 0;
        }
 
@@ -223,6 +284,7 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = IntPtr.Zero;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 1;
        }
 
@@ -231,6 +293,7 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = a1;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 2;
        }
 
@@ -239,7 +302,17 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = a1;
            _arg2 = a2;
+           _arg3 = IntPtr.Zero;
            _arity = 3;
+       }
+
+       public CLf(delegate*<T0, void*, void*, void*, void*, TR> fn, IntPtr a0, IntPtr a1, IntPtr a2, IntPtr a3) {
+           _fn = fn;
+           _arg0 = a0;
+           _arg1 = a1;
+           _arg2 = a2;
+           _arg3 = a3;
+           _arity = 4;
        }
 
        public TR Invoke(T0 p0) {
@@ -252,6 +325,8 @@ namespace Rondo.Core.Lib {
                 return ((delegate*<T0, void*, void*, TR>)_fn)(p0, _arg0.ToPointer(), _arg1.ToPointer());
             case 3:
                 return ((delegate*<T0, void*, void*, void*, TR>)_fn)(p0, _arg0.ToPointer(), _arg1.ToPointer(), _arg2.ToPointer());
+            case 4:
+                return ((delegate*<T0, void*, void*, void*, void*, TR>)_fn)(p0, _arg0.ToPointer(), _arg1.ToPointer(), _arg2.ToPointer(), _arg3.ToPointer());
             default:
                 Assert.Fail("Unsupported closure arity");
                 return default;
@@ -268,11 +343,14 @@ namespace Rondo.Core.Lib {
             if (_arg2 != IntPtr.Zero) {
                 Marshal.FreeHGlobal(_arg2);
             }
+            if (_arg3 != IntPtr.Zero) {
+                Marshal.FreeHGlobal(_arg3);
+            }
         }
 
         public bool Equals(CLf<T0, TR> other) {
 #pragma warning disable CS8909
-            return _fn == other._fn && _arity == other._arity && _arg0 == other._arg0 && _arg1 == other._arg1 && _arg2 == other._arg2;
+            return _fn == other._fn && _arity == other._arity && _arg0 == other._arg0 && _arg1 == other._arg1 && _arg2 == other._arg2 && _arg3 == other._arg3;
 #pragma warning restore CS8909
         }
     }
@@ -317,6 +395,26 @@ namespace Rondo.Core.Lib {
             Buffer.MemoryCopy(&a2, pa2.ToPointer(), sz2, sz2);
             return new CLa<T0>((delegate*<T0, IntPtr, IntPtr, IntPtr, void>)fn, pa0, pa1, pa2);
         }
+
+        public static CLa<T0> New<T0, A0, A1, A2, A3>(delegate*<T0, A0*, A1*, A2*, A3*, void> fn,A0 a0, A1 a1, A2 a2, A3 a3)
+                where A0: unmanaged
+                where A1: unmanaged
+                where A2: unmanaged
+                where A3: unmanaged {
+            var sz0 = Mem.SizeOf<A0>();
+            var pa0 = Marshal.AllocHGlobal(sz0);
+            Buffer.MemoryCopy(&a0, pa0.ToPointer(), sz0, sz0);
+            var sz1 = Mem.SizeOf<A1>();
+            var pa1 = Marshal.AllocHGlobal(sz1);
+            Buffer.MemoryCopy(&a1, pa1.ToPointer(), sz1, sz1);
+            var sz2 = Mem.SizeOf<A2>();
+            var pa2 = Marshal.AllocHGlobal(sz2);
+            Buffer.MemoryCopy(&a2, pa2.ToPointer(), sz2, sz2);
+            var sz3 = Mem.SizeOf<A3>();
+            var pa3 = Marshal.AllocHGlobal(sz3);
+            Buffer.MemoryCopy(&a3, pa3.ToPointer(), sz3, sz3);
+            return new CLa<T0>((delegate*<T0, IntPtr, IntPtr, IntPtr, IntPtr, void>)fn, pa0, pa1, pa2, pa3);
+        }
     }
 
     public static unsafe partial class CLf {
@@ -359,6 +457,26 @@ namespace Rondo.Core.Lib {
             Buffer.MemoryCopy(&a2, pa2.ToPointer(), sz2, sz2);
             return new CLf<T0, TR>((delegate*<T0, void*, void*, void*, TR>)fn, pa0, pa1, pa2);
         }
+
+        public static CLf<T0,TR> New<T0, A0, A1, A2, A3, TR>(delegate*<T0, A0*, A1*, A2*, A3*, TR> fn,A0 a0, A1 a1, A2 a2, A3 a3)
+                where A0: unmanaged
+                where A1: unmanaged
+                where A2: unmanaged
+                where A3: unmanaged {
+            var sz0 = Mem.SizeOf<A0>();
+            var pa0 = Marshal.AllocHGlobal(sz0);
+            Buffer.MemoryCopy(&a0, pa0.ToPointer(), sz0, sz0);
+            var sz1 = Mem.SizeOf<A1>();
+            var pa1 = Marshal.AllocHGlobal(sz1);
+            Buffer.MemoryCopy(&a1, pa1.ToPointer(), sz1, sz1);
+            var sz2 = Mem.SizeOf<A2>();
+            var pa2 = Marshal.AllocHGlobal(sz2);
+            Buffer.MemoryCopy(&a2, pa2.ToPointer(), sz2, sz2);
+            var sz3 = Mem.SizeOf<A3>();
+            var pa3 = Marshal.AllocHGlobal(sz3);
+            Buffer.MemoryCopy(&a3, pa3.ToPointer(), sz3, sz3);
+            return new CLf<T0, TR>((delegate*<T0, void*, void*, void*, void*, TR>)fn, pa0, pa1, pa2, pa3);
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -368,12 +486,14 @@ namespace Rondo.Core.Lib {
        private readonly IntPtr _arg0;
        private readonly IntPtr _arg1;
        private readonly IntPtr _arg2;
+       private readonly IntPtr _arg3;
 
        public CLa(delegate*<T0,T1, void> fn) {
            _fn = fn;
            _arg0 = IntPtr.Zero;
            _arg1 = IntPtr.Zero;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 0;
        }
 
@@ -382,6 +502,7 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = IntPtr.Zero;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 1;
        }
 
@@ -390,6 +511,7 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = a1;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 2;
        }
 
@@ -398,7 +520,17 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = a1;
            _arg2 = a2;
+           _arg3 = IntPtr.Zero;
            _arity = 3;
+       }
+
+       public CLa(delegate*<T0,T1, IntPtr, IntPtr, IntPtr, IntPtr, void> fn, IntPtr a0, IntPtr a1, IntPtr a2, IntPtr a3) {
+           _fn = fn;
+           _arg0 = a0;
+           _arg1 = a1;
+           _arg2 = a2;
+           _arg3 = a3;
+           _arity = 4;
        }
 
        public void Invoke(T0 p0, T1 p1) {
@@ -414,6 +546,9 @@ namespace Rondo.Core.Lib {
                 break;
             case 3:
                 ((delegate*<T0,T1, void*, void*, void*, void>)_fn)(p0,p1, _arg0.ToPointer(), _arg1.ToPointer(), _arg2.ToPointer());
+                break;
+            case 4:
+                ((delegate*<T0,T1, void*, void*, void*, void*, void>)_fn)(p0,p1, _arg0.ToPointer(), _arg1.ToPointer(), _arg2.ToPointer(), _arg3.ToPointer());
                 break;
             default:
                 Assert.Fail("Unsupported closure arity");
@@ -431,11 +566,14 @@ namespace Rondo.Core.Lib {
             if (_arg2 != IntPtr.Zero) {
                 Marshal.FreeHGlobal(_arg2);
             }
+            if (_arg3 != IntPtr.Zero) {
+                Marshal.FreeHGlobal(_arg3);
+            }
         }
 
         public bool Equals(CLa<T0, T1> other) {
 #pragma warning disable CS8909
-            return _fn == other._fn && _arity == other._arity && _arg0 == other._arg0 && _arg1 == other._arg1 && _arg2 == other._arg2;
+            return _fn == other._fn && _arity == other._arity && _arg0 == other._arg0 && _arg1 == other._arg1 && _arg2 == other._arg2 && _arg3 == other._arg3;
 #pragma warning restore CS8909
         }
     }
@@ -447,12 +585,14 @@ namespace Rondo.Core.Lib {
        private readonly IntPtr _arg0;
        private readonly IntPtr _arg1;
        private readonly IntPtr _arg2;
+       private readonly IntPtr _arg3;
 
        public CLf(delegate*<T0,T1, TR> fn) {
            _fn = fn;
            _arg0 = IntPtr.Zero;
            _arg1 = IntPtr.Zero;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 0;
        }
 
@@ -461,6 +601,7 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = IntPtr.Zero;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 1;
        }
 
@@ -469,6 +610,7 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = a1;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 2;
        }
 
@@ -477,7 +619,17 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = a1;
            _arg2 = a2;
+           _arg3 = IntPtr.Zero;
            _arity = 3;
+       }
+
+       public CLf(delegate*<T0,T1, void*, void*, void*, void*, TR> fn, IntPtr a0, IntPtr a1, IntPtr a2, IntPtr a3) {
+           _fn = fn;
+           _arg0 = a0;
+           _arg1 = a1;
+           _arg2 = a2;
+           _arg3 = a3;
+           _arity = 4;
        }
 
        public TR Invoke(T0 p0, T1 p1) {
@@ -490,6 +642,8 @@ namespace Rondo.Core.Lib {
                 return ((delegate*<T0, T1, void*, void*, TR>)_fn)(p0, p1, _arg0.ToPointer(), _arg1.ToPointer());
             case 3:
                 return ((delegate*<T0, T1, void*, void*, void*, TR>)_fn)(p0, p1, _arg0.ToPointer(), _arg1.ToPointer(), _arg2.ToPointer());
+            case 4:
+                return ((delegate*<T0, T1, void*, void*, void*, void*, TR>)_fn)(p0, p1, _arg0.ToPointer(), _arg1.ToPointer(), _arg2.ToPointer(), _arg3.ToPointer());
             default:
                 Assert.Fail("Unsupported closure arity");
                 return default;
@@ -506,11 +660,14 @@ namespace Rondo.Core.Lib {
             if (_arg2 != IntPtr.Zero) {
                 Marshal.FreeHGlobal(_arg2);
             }
+            if (_arg3 != IntPtr.Zero) {
+                Marshal.FreeHGlobal(_arg3);
+            }
         }
 
         public bool Equals(CLf<T0, T1, TR> other) {
 #pragma warning disable CS8909
-            return _fn == other._fn && _arity == other._arity && _arg0 == other._arg0 && _arg1 == other._arg1 && _arg2 == other._arg2;
+            return _fn == other._fn && _arity == other._arity && _arg0 == other._arg0 && _arg1 == other._arg1 && _arg2 == other._arg2 && _arg3 == other._arg3;
 #pragma warning restore CS8909
         }
     }
@@ -555,6 +712,26 @@ namespace Rondo.Core.Lib {
             Buffer.MemoryCopy(&a2, pa2.ToPointer(), sz2, sz2);
             return new CLa<T0, T1>((delegate*<T0, T1, IntPtr, IntPtr, IntPtr, void>)fn, pa0, pa1, pa2);
         }
+
+        public static CLa<T0, T1> New<T0, T1, A0, A1, A2, A3>(delegate*<T0, T1, A0*, A1*, A2*, A3*, void> fn,A0 a0, A1 a1, A2 a2, A3 a3)
+                where A0: unmanaged
+                where A1: unmanaged
+                where A2: unmanaged
+                where A3: unmanaged {
+            var sz0 = Mem.SizeOf<A0>();
+            var pa0 = Marshal.AllocHGlobal(sz0);
+            Buffer.MemoryCopy(&a0, pa0.ToPointer(), sz0, sz0);
+            var sz1 = Mem.SizeOf<A1>();
+            var pa1 = Marshal.AllocHGlobal(sz1);
+            Buffer.MemoryCopy(&a1, pa1.ToPointer(), sz1, sz1);
+            var sz2 = Mem.SizeOf<A2>();
+            var pa2 = Marshal.AllocHGlobal(sz2);
+            Buffer.MemoryCopy(&a2, pa2.ToPointer(), sz2, sz2);
+            var sz3 = Mem.SizeOf<A3>();
+            var pa3 = Marshal.AllocHGlobal(sz3);
+            Buffer.MemoryCopy(&a3, pa3.ToPointer(), sz3, sz3);
+            return new CLa<T0, T1>((delegate*<T0, T1, IntPtr, IntPtr, IntPtr, IntPtr, void>)fn, pa0, pa1, pa2, pa3);
+        }
     }
 
     public static unsafe partial class CLf {
@@ -597,6 +774,26 @@ namespace Rondo.Core.Lib {
             Buffer.MemoryCopy(&a2, pa2.ToPointer(), sz2, sz2);
             return new CLf<T0, T1, TR>((delegate*<T0, T1, void*, void*, void*, TR>)fn, pa0, pa1, pa2);
         }
+
+        public static CLf<T0, T1,TR> New<T0, T1, A0, A1, A2, A3, TR>(delegate*<T0, T1, A0*, A1*, A2*, A3*, TR> fn,A0 a0, A1 a1, A2 a2, A3 a3)
+                where A0: unmanaged
+                where A1: unmanaged
+                where A2: unmanaged
+                where A3: unmanaged {
+            var sz0 = Mem.SizeOf<A0>();
+            var pa0 = Marshal.AllocHGlobal(sz0);
+            Buffer.MemoryCopy(&a0, pa0.ToPointer(), sz0, sz0);
+            var sz1 = Mem.SizeOf<A1>();
+            var pa1 = Marshal.AllocHGlobal(sz1);
+            Buffer.MemoryCopy(&a1, pa1.ToPointer(), sz1, sz1);
+            var sz2 = Mem.SizeOf<A2>();
+            var pa2 = Marshal.AllocHGlobal(sz2);
+            Buffer.MemoryCopy(&a2, pa2.ToPointer(), sz2, sz2);
+            var sz3 = Mem.SizeOf<A3>();
+            var pa3 = Marshal.AllocHGlobal(sz3);
+            Buffer.MemoryCopy(&a3, pa3.ToPointer(), sz3, sz3);
+            return new CLf<T0, T1, TR>((delegate*<T0, T1, void*, void*, void*, void*, TR>)fn, pa0, pa1, pa2, pa3);
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -606,12 +803,14 @@ namespace Rondo.Core.Lib {
        private readonly IntPtr _arg0;
        private readonly IntPtr _arg1;
        private readonly IntPtr _arg2;
+       private readonly IntPtr _arg3;
 
        public CLa(delegate*<T0,T1,T2, void> fn) {
            _fn = fn;
            _arg0 = IntPtr.Zero;
            _arg1 = IntPtr.Zero;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 0;
        }
 
@@ -620,6 +819,7 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = IntPtr.Zero;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 1;
        }
 
@@ -628,6 +828,7 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = a1;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 2;
        }
 
@@ -636,7 +837,17 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = a1;
            _arg2 = a2;
+           _arg3 = IntPtr.Zero;
            _arity = 3;
+       }
+
+       public CLa(delegate*<T0,T1,T2, IntPtr, IntPtr, IntPtr, IntPtr, void> fn, IntPtr a0, IntPtr a1, IntPtr a2, IntPtr a3) {
+           _fn = fn;
+           _arg0 = a0;
+           _arg1 = a1;
+           _arg2 = a2;
+           _arg3 = a3;
+           _arity = 4;
        }
 
        public void Invoke(T0 p0, T1 p1, T2 p2) {
@@ -652,6 +863,9 @@ namespace Rondo.Core.Lib {
                 break;
             case 3:
                 ((delegate*<T0,T1,T2, void*, void*, void*, void>)_fn)(p0,p1,p2, _arg0.ToPointer(), _arg1.ToPointer(), _arg2.ToPointer());
+                break;
+            case 4:
+                ((delegate*<T0,T1,T2, void*, void*, void*, void*, void>)_fn)(p0,p1,p2, _arg0.ToPointer(), _arg1.ToPointer(), _arg2.ToPointer(), _arg3.ToPointer());
                 break;
             default:
                 Assert.Fail("Unsupported closure arity");
@@ -669,11 +883,14 @@ namespace Rondo.Core.Lib {
             if (_arg2 != IntPtr.Zero) {
                 Marshal.FreeHGlobal(_arg2);
             }
+            if (_arg3 != IntPtr.Zero) {
+                Marshal.FreeHGlobal(_arg3);
+            }
         }
 
         public bool Equals(CLa<T0, T1, T2> other) {
 #pragma warning disable CS8909
-            return _fn == other._fn && _arity == other._arity && _arg0 == other._arg0 && _arg1 == other._arg1 && _arg2 == other._arg2;
+            return _fn == other._fn && _arity == other._arity && _arg0 == other._arg0 && _arg1 == other._arg1 && _arg2 == other._arg2 && _arg3 == other._arg3;
 #pragma warning restore CS8909
         }
     }
@@ -685,12 +902,14 @@ namespace Rondo.Core.Lib {
        private readonly IntPtr _arg0;
        private readonly IntPtr _arg1;
        private readonly IntPtr _arg2;
+       private readonly IntPtr _arg3;
 
        public CLf(delegate*<T0,T1,T2, TR> fn) {
            _fn = fn;
            _arg0 = IntPtr.Zero;
            _arg1 = IntPtr.Zero;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 0;
        }
 
@@ -699,6 +918,7 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = IntPtr.Zero;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 1;
        }
 
@@ -707,6 +927,7 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = a1;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 2;
        }
 
@@ -715,7 +936,17 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = a1;
            _arg2 = a2;
+           _arg3 = IntPtr.Zero;
            _arity = 3;
+       }
+
+       public CLf(delegate*<T0,T1,T2, void*, void*, void*, void*, TR> fn, IntPtr a0, IntPtr a1, IntPtr a2, IntPtr a3) {
+           _fn = fn;
+           _arg0 = a0;
+           _arg1 = a1;
+           _arg2 = a2;
+           _arg3 = a3;
+           _arity = 4;
        }
 
        public TR Invoke(T0 p0, T1 p1, T2 p2) {
@@ -728,6 +959,8 @@ namespace Rondo.Core.Lib {
                 return ((delegate*<T0, T1, T2, void*, void*, TR>)_fn)(p0, p1, p2, _arg0.ToPointer(), _arg1.ToPointer());
             case 3:
                 return ((delegate*<T0, T1, T2, void*, void*, void*, TR>)_fn)(p0, p1, p2, _arg0.ToPointer(), _arg1.ToPointer(), _arg2.ToPointer());
+            case 4:
+                return ((delegate*<T0, T1, T2, void*, void*, void*, void*, TR>)_fn)(p0, p1, p2, _arg0.ToPointer(), _arg1.ToPointer(), _arg2.ToPointer(), _arg3.ToPointer());
             default:
                 Assert.Fail("Unsupported closure arity");
                 return default;
@@ -744,11 +977,14 @@ namespace Rondo.Core.Lib {
             if (_arg2 != IntPtr.Zero) {
                 Marshal.FreeHGlobal(_arg2);
             }
+            if (_arg3 != IntPtr.Zero) {
+                Marshal.FreeHGlobal(_arg3);
+            }
         }
 
         public bool Equals(CLf<T0, T1, T2, TR> other) {
 #pragma warning disable CS8909
-            return _fn == other._fn && _arity == other._arity && _arg0 == other._arg0 && _arg1 == other._arg1 && _arg2 == other._arg2;
+            return _fn == other._fn && _arity == other._arity && _arg0 == other._arg0 && _arg1 == other._arg1 && _arg2 == other._arg2 && _arg3 == other._arg3;
 #pragma warning restore CS8909
         }
     }
@@ -793,6 +1029,26 @@ namespace Rondo.Core.Lib {
             Buffer.MemoryCopy(&a2, pa2.ToPointer(), sz2, sz2);
             return new CLa<T0, T1, T2>((delegate*<T0, T1, T2, IntPtr, IntPtr, IntPtr, void>)fn, pa0, pa1, pa2);
         }
+
+        public static CLa<T0, T1, T2> New<T0, T1, T2, A0, A1, A2, A3>(delegate*<T0, T1, T2, A0*, A1*, A2*, A3*, void> fn,A0 a0, A1 a1, A2 a2, A3 a3)
+                where A0: unmanaged
+                where A1: unmanaged
+                where A2: unmanaged
+                where A3: unmanaged {
+            var sz0 = Mem.SizeOf<A0>();
+            var pa0 = Marshal.AllocHGlobal(sz0);
+            Buffer.MemoryCopy(&a0, pa0.ToPointer(), sz0, sz0);
+            var sz1 = Mem.SizeOf<A1>();
+            var pa1 = Marshal.AllocHGlobal(sz1);
+            Buffer.MemoryCopy(&a1, pa1.ToPointer(), sz1, sz1);
+            var sz2 = Mem.SizeOf<A2>();
+            var pa2 = Marshal.AllocHGlobal(sz2);
+            Buffer.MemoryCopy(&a2, pa2.ToPointer(), sz2, sz2);
+            var sz3 = Mem.SizeOf<A3>();
+            var pa3 = Marshal.AllocHGlobal(sz3);
+            Buffer.MemoryCopy(&a3, pa3.ToPointer(), sz3, sz3);
+            return new CLa<T0, T1, T2>((delegate*<T0, T1, T2, IntPtr, IntPtr, IntPtr, IntPtr, void>)fn, pa0, pa1, pa2, pa3);
+        }
     }
 
     public static unsafe partial class CLf {
@@ -835,6 +1091,26 @@ namespace Rondo.Core.Lib {
             Buffer.MemoryCopy(&a2, pa2.ToPointer(), sz2, sz2);
             return new CLf<T0, T1, T2, TR>((delegate*<T0, T1, T2, void*, void*, void*, TR>)fn, pa0, pa1, pa2);
         }
+
+        public static CLf<T0, T1, T2,TR> New<T0, T1, T2, A0, A1, A2, A3, TR>(delegate*<T0, T1, T2, A0*, A1*, A2*, A3*, TR> fn,A0 a0, A1 a1, A2 a2, A3 a3)
+                where A0: unmanaged
+                where A1: unmanaged
+                where A2: unmanaged
+                where A3: unmanaged {
+            var sz0 = Mem.SizeOf<A0>();
+            var pa0 = Marshal.AllocHGlobal(sz0);
+            Buffer.MemoryCopy(&a0, pa0.ToPointer(), sz0, sz0);
+            var sz1 = Mem.SizeOf<A1>();
+            var pa1 = Marshal.AllocHGlobal(sz1);
+            Buffer.MemoryCopy(&a1, pa1.ToPointer(), sz1, sz1);
+            var sz2 = Mem.SizeOf<A2>();
+            var pa2 = Marshal.AllocHGlobal(sz2);
+            Buffer.MemoryCopy(&a2, pa2.ToPointer(), sz2, sz2);
+            var sz3 = Mem.SizeOf<A3>();
+            var pa3 = Marshal.AllocHGlobal(sz3);
+            Buffer.MemoryCopy(&a3, pa3.ToPointer(), sz3, sz3);
+            return new CLf<T0, T1, T2, TR>((delegate*<T0, T1, T2, void*, void*, void*, void*, TR>)fn, pa0, pa1, pa2, pa3);
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -844,12 +1120,14 @@ namespace Rondo.Core.Lib {
        private readonly IntPtr _arg0;
        private readonly IntPtr _arg1;
        private readonly IntPtr _arg2;
+       private readonly IntPtr _arg3;
 
        public CLa(delegate*<T0,T1,T2,T3, void> fn) {
            _fn = fn;
            _arg0 = IntPtr.Zero;
            _arg1 = IntPtr.Zero;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 0;
        }
 
@@ -858,6 +1136,7 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = IntPtr.Zero;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 1;
        }
 
@@ -866,6 +1145,7 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = a1;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 2;
        }
 
@@ -874,7 +1154,17 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = a1;
            _arg2 = a2;
+           _arg3 = IntPtr.Zero;
            _arity = 3;
+       }
+
+       public CLa(delegate*<T0,T1,T2,T3, IntPtr, IntPtr, IntPtr, IntPtr, void> fn, IntPtr a0, IntPtr a1, IntPtr a2, IntPtr a3) {
+           _fn = fn;
+           _arg0 = a0;
+           _arg1 = a1;
+           _arg2 = a2;
+           _arg3 = a3;
+           _arity = 4;
        }
 
        public void Invoke(T0 p0, T1 p1, T2 p2, T3 p3) {
@@ -890,6 +1180,9 @@ namespace Rondo.Core.Lib {
                 break;
             case 3:
                 ((delegate*<T0,T1,T2,T3, void*, void*, void*, void>)_fn)(p0,p1,p2,p3, _arg0.ToPointer(), _arg1.ToPointer(), _arg2.ToPointer());
+                break;
+            case 4:
+                ((delegate*<T0,T1,T2,T3, void*, void*, void*, void*, void>)_fn)(p0,p1,p2,p3, _arg0.ToPointer(), _arg1.ToPointer(), _arg2.ToPointer(), _arg3.ToPointer());
                 break;
             default:
                 Assert.Fail("Unsupported closure arity");
@@ -907,11 +1200,14 @@ namespace Rondo.Core.Lib {
             if (_arg2 != IntPtr.Zero) {
                 Marshal.FreeHGlobal(_arg2);
             }
+            if (_arg3 != IntPtr.Zero) {
+                Marshal.FreeHGlobal(_arg3);
+            }
         }
 
         public bool Equals(CLa<T0, T1, T2, T3> other) {
 #pragma warning disable CS8909
-            return _fn == other._fn && _arity == other._arity && _arg0 == other._arg0 && _arg1 == other._arg1 && _arg2 == other._arg2;
+            return _fn == other._fn && _arity == other._arity && _arg0 == other._arg0 && _arg1 == other._arg1 && _arg2 == other._arg2 && _arg3 == other._arg3;
 #pragma warning restore CS8909
         }
     }
@@ -923,12 +1219,14 @@ namespace Rondo.Core.Lib {
        private readonly IntPtr _arg0;
        private readonly IntPtr _arg1;
        private readonly IntPtr _arg2;
+       private readonly IntPtr _arg3;
 
        public CLf(delegate*<T0,T1,T2,T3, TR> fn) {
            _fn = fn;
            _arg0 = IntPtr.Zero;
            _arg1 = IntPtr.Zero;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 0;
        }
 
@@ -937,6 +1235,7 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = IntPtr.Zero;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 1;
        }
 
@@ -945,6 +1244,7 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = a1;
            _arg2 = IntPtr.Zero;
+           _arg3 = IntPtr.Zero;
            _arity = 2;
        }
 
@@ -953,7 +1253,17 @@ namespace Rondo.Core.Lib {
            _arg0 = a0;
            _arg1 = a1;
            _arg2 = a2;
+           _arg3 = IntPtr.Zero;
            _arity = 3;
+       }
+
+       public CLf(delegate*<T0,T1,T2,T3, void*, void*, void*, void*, TR> fn, IntPtr a0, IntPtr a1, IntPtr a2, IntPtr a3) {
+           _fn = fn;
+           _arg0 = a0;
+           _arg1 = a1;
+           _arg2 = a2;
+           _arg3 = a3;
+           _arity = 4;
        }
 
        public TR Invoke(T0 p0, T1 p1, T2 p2, T3 p3) {
@@ -966,6 +1276,8 @@ namespace Rondo.Core.Lib {
                 return ((delegate*<T0, T1, T2, T3, void*, void*, TR>)_fn)(p0, p1, p2, p3, _arg0.ToPointer(), _arg1.ToPointer());
             case 3:
                 return ((delegate*<T0, T1, T2, T3, void*, void*, void*, TR>)_fn)(p0, p1, p2, p3, _arg0.ToPointer(), _arg1.ToPointer(), _arg2.ToPointer());
+            case 4:
+                return ((delegate*<T0, T1, T2, T3, void*, void*, void*, void*, TR>)_fn)(p0, p1, p2, p3, _arg0.ToPointer(), _arg1.ToPointer(), _arg2.ToPointer(), _arg3.ToPointer());
             default:
                 Assert.Fail("Unsupported closure arity");
                 return default;
@@ -982,11 +1294,14 @@ namespace Rondo.Core.Lib {
             if (_arg2 != IntPtr.Zero) {
                 Marshal.FreeHGlobal(_arg2);
             }
+            if (_arg3 != IntPtr.Zero) {
+                Marshal.FreeHGlobal(_arg3);
+            }
         }
 
         public bool Equals(CLf<T0, T1, T2, T3, TR> other) {
 #pragma warning disable CS8909
-            return _fn == other._fn && _arity == other._arity && _arg0 == other._arg0 && _arg1 == other._arg1 && _arg2 == other._arg2;
+            return _fn == other._fn && _arity == other._arity && _arg0 == other._arg0 && _arg1 == other._arg1 && _arg2 == other._arg2 && _arg3 == other._arg3;
 #pragma warning restore CS8909
         }
     }
@@ -1031,6 +1346,26 @@ namespace Rondo.Core.Lib {
             Buffer.MemoryCopy(&a2, pa2.ToPointer(), sz2, sz2);
             return new CLa<T0, T1, T2, T3>((delegate*<T0, T1, T2, T3, IntPtr, IntPtr, IntPtr, void>)fn, pa0, pa1, pa2);
         }
+
+        public static CLa<T0, T1, T2, T3> New<T0, T1, T2, T3, A0, A1, A2, A3>(delegate*<T0, T1, T2, T3, A0*, A1*, A2*, A3*, void> fn,A0 a0, A1 a1, A2 a2, A3 a3)
+                where A0: unmanaged
+                where A1: unmanaged
+                where A2: unmanaged
+                where A3: unmanaged {
+            var sz0 = Mem.SizeOf<A0>();
+            var pa0 = Marshal.AllocHGlobal(sz0);
+            Buffer.MemoryCopy(&a0, pa0.ToPointer(), sz0, sz0);
+            var sz1 = Mem.SizeOf<A1>();
+            var pa1 = Marshal.AllocHGlobal(sz1);
+            Buffer.MemoryCopy(&a1, pa1.ToPointer(), sz1, sz1);
+            var sz2 = Mem.SizeOf<A2>();
+            var pa2 = Marshal.AllocHGlobal(sz2);
+            Buffer.MemoryCopy(&a2, pa2.ToPointer(), sz2, sz2);
+            var sz3 = Mem.SizeOf<A3>();
+            var pa3 = Marshal.AllocHGlobal(sz3);
+            Buffer.MemoryCopy(&a3, pa3.ToPointer(), sz3, sz3);
+            return new CLa<T0, T1, T2, T3>((delegate*<T0, T1, T2, T3, IntPtr, IntPtr, IntPtr, IntPtr, void>)fn, pa0, pa1, pa2, pa3);
+        }
     }
 
     public static unsafe partial class CLf {
@@ -1072,6 +1407,26 @@ namespace Rondo.Core.Lib {
             var pa2 = Marshal.AllocHGlobal(sz2);
             Buffer.MemoryCopy(&a2, pa2.ToPointer(), sz2, sz2);
             return new CLf<T0, T1, T2, T3, TR>((delegate*<T0, T1, T2, T3, void*, void*, void*, TR>)fn, pa0, pa1, pa2);
+        }
+
+        public static CLf<T0, T1, T2, T3,TR> New<T0, T1, T2, T3, A0, A1, A2, A3, TR>(delegate*<T0, T1, T2, T3, A0*, A1*, A2*, A3*, TR> fn,A0 a0, A1 a1, A2 a2, A3 a3)
+                where A0: unmanaged
+                where A1: unmanaged
+                where A2: unmanaged
+                where A3: unmanaged {
+            var sz0 = Mem.SizeOf<A0>();
+            var pa0 = Marshal.AllocHGlobal(sz0);
+            Buffer.MemoryCopy(&a0, pa0.ToPointer(), sz0, sz0);
+            var sz1 = Mem.SizeOf<A1>();
+            var pa1 = Marshal.AllocHGlobal(sz1);
+            Buffer.MemoryCopy(&a1, pa1.ToPointer(), sz1, sz1);
+            var sz2 = Mem.SizeOf<A2>();
+            var pa2 = Marshal.AllocHGlobal(sz2);
+            Buffer.MemoryCopy(&a2, pa2.ToPointer(), sz2, sz2);
+            var sz3 = Mem.SizeOf<A3>();
+            var pa3 = Marshal.AllocHGlobal(sz3);
+            Buffer.MemoryCopy(&a3, pa3.ToPointer(), sz3, sz3);
+            return new CLf<T0, T1, T2, T3, TR>((delegate*<T0, T1, T2, T3, void*, void*, void*, void*, TR>)fn, pa0, pa1, pa2, pa3);
         }
     }
 

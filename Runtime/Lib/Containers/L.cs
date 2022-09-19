@@ -370,6 +370,10 @@ namespace Rondo.Core.Lib.Containers {
             return Maybe<T>.Nothing;
         }
 
+        public static Maybe<T> First<T>(this L<T> xs) where T : unmanaged {
+            return xs.At(0);
+        }
+
         public static Maybe<T> Last<T>(this L<T> xs, delegate*<T, bool> f) where T : unmanaged {
             return xs.Last(Cf.New(f));
         }
@@ -381,6 +385,10 @@ namespace Rondo.Core.Lib.Containers {
                 }
             }
             return Maybe<T>.Nothing;
+        }
+
+        public static Maybe<T> Last<T>(this L<T> xs) where T : unmanaged {
+            return xs.At(xs.Length() - 1);
         }
 
         /// <summary>
@@ -427,7 +435,7 @@ namespace Rondo.Core.Lib.Containers {
         /// <summary>
         /// Determine the length of a list.
         /// </summary>
-        public static int GetLength<T>(this L<T> xs) where T : unmanaged {
+        public static int Length<T>(this L<T> xs) where T : unmanaged {
             return xs.Size;
         }
 
@@ -529,7 +537,7 @@ namespace Rondo.Core.Lib.Containers {
         }
 
         private static int SumLength<T>(L<T> list, int sum) where T : unmanaged {
-            return list.GetLength() + sum;
+            return list.Length() + sum;
         }
 
         /// <summary>
@@ -552,7 +560,7 @@ namespace Rondo.Core.Lib.Containers {
             if (xs.IsEmpty()) {
                 return new();
             }
-            var list = new L<T>(xs.GetLength() * 2 - 1);
+            var list = new L<T>(xs.Length() * 2 - 1);
             list.Data[0] = xs.Data[0];
             var index = 1;
             for (var i = 1; i < xs.Size; i++) {
@@ -583,7 +591,7 @@ namespace Rondo.Core.Lib.Containers {
             if (la.IsEmpty() || lb.IsEmpty()) {
                 return new();
             }
-            var list = new L<TR>(Math.Min(la.GetLength(), lb.GetLength()));
+            var list = new L<TR>(Math.Min(la.Length(), lb.Length()));
             for (var i = 0; i < list.Size; i++) {
                 list.Data[i] = f.Invoke(la.Data[i], lb.Data[i]);
             }
@@ -608,7 +616,7 @@ namespace Rondo.Core.Lib.Containers {
             if (la.IsEmpty() || lb.IsEmpty() || lc.IsEmpty()) {
                 return new();
             }
-            var list = new L<TR>(Math.Min(la.GetLength(), lb.GetLength()));
+            var list = new L<TR>(Math.Min(la.Length(), lb.Length()));
             for (var i = 0; i < list.Size; i++) {
                 list.Data[i] = f.Invoke(la.Data[i], lb.Data[i], lc.Data[i]);
             }
@@ -635,7 +643,7 @@ namespace Rondo.Core.Lib.Containers {
             if (la.IsEmpty() || lb.IsEmpty() || lc.IsEmpty() || ld.IsEmpty()) {
                 return new();
             }
-            var list = new L<TR>(Math.Min(la.GetLength(), lb.GetLength()));
+            var list = new L<TR>(Math.Min(la.Length(), lb.Length()));
             for (var i = 0; i < list.Size; i++) {
                 list.Data[i] = f.Invoke(la.Data[i], lb.Data[i], lc.Data[i], ld.Data[i]);
             }
@@ -832,7 +840,7 @@ namespace Rondo.Core.Lib.Containers {
             delegate*<int, TR, T, T> rightStep,
             T acc)
                 where TL : unmanaged where TR : unmanaged {
-            var sz = Math.Max(left.GetLength(), right.GetLength());
+            var sz = Math.Max(left.Length(), right.Length());
             for (var i = 0; i < sz; i++) {
                 if (i < left.Size) {
                     if (i < right.Size) {

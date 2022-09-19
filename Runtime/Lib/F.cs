@@ -9,6 +9,14 @@ namespace Rondo.Core.Lib {
             return t;
         }
 
+        public static Cf<T> Always<T>(T t) where T : unmanaged {
+            static T Impl(T* t) {
+                return *t;
+            }
+
+            return Cf.New(&Impl, t);
+        }
+
         public static TL Left<TL, TR>(TL left, TR _) {
             return left;
         }
