@@ -1,6 +1,6 @@
 {
     "name": "Dvoyni.Rondo.Core",
-    "rootNamespace": "",
+    "rootNamespace": "Rondo.Core",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],

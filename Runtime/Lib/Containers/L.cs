@@ -916,6 +916,22 @@ namespace Rondo.Core.Lib.Containers {
             return list;
         }
 
+        public static L<T> Update<T>(this L<T> list, delegate*<T, Maybe<T>> f) where T : unmanaged {
+            return list.Update(Cf.New(f));
+        }
+        
+        public static L<T> Update<T>(this L<T> list, Cf<T, Maybe<T>> f) where T : unmanaged {
+            var xs = new L<T>(list.Size);
+            for (var i = 0; i < list.Size; i++) {
+                var v = list.Data[i];
+                if (f.Invoke(v).Test(out var dv)) {
+                    v = dv;
+                }
+                xs.Data[i] = v;
+            }
+            return xs;
+        }
+
         public static L<T> Insert<T>(this L<T> list, int index, T value) where T : unmanaged {
             index = Math.Max(0, Math.Min(list.Size, index));
             var next = new L<T>(list.Size + 1);
