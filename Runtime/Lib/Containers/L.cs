@@ -919,7 +919,7 @@ namespace Rondo.Core.Lib.Containers {
         public static L<T> Update<T>(this L<T> list, delegate*<T, Maybe<T>> f) where T : unmanaged {
             return list.Update(Cf.New(f));
         }
-        
+
         public static L<T> Update<T>(this L<T> list, Cf<T, Maybe<T>> f) where T : unmanaged {
             var xs = new L<T>(list.Size);
             for (var i = 0; i < list.Size; i++) {
@@ -974,6 +974,18 @@ namespace Rondo.Core.Lib.Containers {
             var index = 0;
             while (e.MoveNext()) {
                 if (f.Invoke(e.Current)) {
+                    return Maybe<int>.Just(index);
+                }
+                index++;
+            }
+            return Maybe<int>.Nothing;
+        }
+
+        public static Maybe<int> FindIndex<T>(this L<T> list, T x) where T : unmanaged, IEquatable<T> {
+            var e = list.Enumerator;
+            var index = 0;
+            while (e.MoveNext()) {
+                if (e.Current.Equals(x)) {
                     return Maybe<int>.Just(index);
                 }
                 index++;

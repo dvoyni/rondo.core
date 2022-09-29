@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Rondo.Core.Extras;
 using Rondo.Core.Lib.Containers;
 using Rondo.Core.Memory;
@@ -88,6 +89,10 @@ namespace Rondo.Core.Lib {
 
         public static int Compare<T>(T a, T b) where T : IComparable<T> {
             return a.CompareTo(b);
+        }
+
+        public static int DefaultComparer<T>(T a, T b) {
+            return Comparer<T>.Default.Compare(a, b);
         }
     }
 }
