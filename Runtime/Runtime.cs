@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Rondo.Core.Extras;
 using Rondo.Core.Lib;
 using Rondo.Core.Lib.Containers;
@@ -81,10 +82,12 @@ namespace Rondo.Core {
                     while (sz < ex.RequiredSize) {
                         sz *= 2;
                     }
-                    Mem.C.Enlarge(sz);
-                    Mem.C.Clear();
+                    var c = Mem.C;
+                    Mem.C = new Mem(sz, Mem.C.Id + 1);
                     _model = Serializer.Clone(originalModel);
+                    originalModel = _model;
                     Mem.Prev.Enlarge(sz);
+                    c.Free();
                     continue;
                 }
                 break;

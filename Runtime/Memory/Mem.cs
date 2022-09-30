@@ -39,8 +39,15 @@ namespace Rondo.Core.Memory {
         }
 #endif
 
+        internal void Free() {
+            if (_stack != null) {
+                Marshal.FreeHGlobal((IntPtr)_stack);
+                _stack = null;
+            }
+        }
+
         ~Mem() {
-            Marshal.FreeHGlobal((IntPtr)_stack);
+            Free();
         }
 
         internal void Clear() {
