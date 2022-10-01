@@ -413,7 +413,7 @@ namespace Rondo.Core.Lib.Containers {
             if (size > 0) {
                 var index = 0;
                 for (var i = 0; i < xs.Size; i++) {
-                    if (f.Invoke(xs.Data[i]).Test(out var y)) {
+                    if (ys.Data[i].Test(out var y)) {
                         list.Data[index++] = y;
                     }
                 }
