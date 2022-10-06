@@ -10,7 +10,7 @@ namespace Rondo.Core.Memory {
 
     public static unsafe partial class Serializer {
         public const string StringifyTab = "  ";
-        internal delegate string StringifyDelegate(void* data, Info info, string offset);
+        public delegate string StringifyDelegate(void* data, Info info, string offset);
 
         public static string Stringify<T>(T data) where T : unmanaged {
             return Stringify(&data);

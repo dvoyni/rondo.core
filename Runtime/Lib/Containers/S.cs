@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Rondo.Core.Extras;
 
 namespace Rondo.Core.Lib.Containers {
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public readonly struct S : IEquatable<S>, IComparable<S> {
         private static readonly List<string> _toString = new() { "" };
         private static readonly Dictionary<string, int> _toHash = new() { { "", 0 } };

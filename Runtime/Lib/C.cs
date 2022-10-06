@@ -5,14 +5,14 @@ using Rondo.Core.Extras;
 using Rondo.Core.Memory;
 
 namespace Rondo.Core.Lib {
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
     public readonly unsafe struct Cf<TR> {
-       private readonly void* _fn;
-       private readonly int _arity;
        private readonly void* _arg0;
-       private readonly void* _arg1;
-       private readonly void* _arg2;
-       private readonly void* _arg3;
+        private readonly void* _arg1;
+        private readonly void* _arg2;
+        private readonly void* _arg3;
+        private readonly int _arity;
+        private readonly void* _fn;
 
        public Cf(delegate*<TR> fn) {
            _fn = fn;
@@ -59,7 +59,7 @@ namespace Rondo.Core.Lib {
            _arity = 4;
        }
 
-       public TR Invoke() {
+        public TR Invoke() {
             switch (_arity) {
             case 0:
                 return ((delegate*<TR>)_fn)();
@@ -120,14 +120,14 @@ namespace Rondo.Core.Lib {
         }
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
     public readonly unsafe struct Ca<T0> {
-       private readonly void* _fn;
-       private readonly int _arity;
        private readonly void* _arg0;
-       private readonly void* _arg1;
-       private readonly void* _arg2;
-       private readonly void* _arg3;
+        private readonly void* _arg1;
+        private readonly void* _arg2;
+        private readonly void* _arg3;
+        private readonly int _arity;
+        private readonly void* _fn;
 
        public Ca(delegate*<T0, void> fn) {
            _fn = fn;
@@ -174,7 +174,7 @@ namespace Rondo.Core.Lib {
            _arity = 4;
        }
 
-       public void Invoke(T0 p0) {
+        public void Invoke(T0 p0) {
             switch (_arity) {
             case 0:
                 ((delegate*<T0, void>)_fn)(p0);
@@ -198,14 +198,14 @@ namespace Rondo.Core.Lib {
         }
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
     public readonly unsafe struct Cf<T0, TR> {
-       private readonly void* _fn;
-       private readonly int _arity;
        private readonly void* _arg0;
-       private readonly void* _arg1;
-       private readonly void* _arg2;
-       private readonly void* _arg3;
+        private readonly void* _arg1;
+        private readonly void* _arg2;
+        private readonly void* _arg3;
+        private readonly int _arity;
+        private readonly void* _fn;
 
        public Cf(delegate*<T0, TR> fn) {
            _fn = fn;
@@ -252,7 +252,7 @@ namespace Rondo.Core.Lib {
            _arity = 4;
        }
 
-       public TR Invoke(T0 p0) {
+        public TR Invoke(T0 p0) {
             switch (_arity) {
             case 0:
                 return ((delegate*<T0, TR>)_fn)(p0);
@@ -355,14 +355,14 @@ namespace Rondo.Core.Lib {
         }
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
     public readonly unsafe struct Ca<T0, T1> {
-       private readonly void* _fn;
-       private readonly int _arity;
        private readonly void* _arg0;
-       private readonly void* _arg1;
-       private readonly void* _arg2;
-       private readonly void* _arg3;
+        private readonly void* _arg1;
+        private readonly void* _arg2;
+        private readonly void* _arg3;
+        private readonly int _arity;
+        private readonly void* _fn;
 
        public Ca(delegate*<T0,T1, void> fn) {
            _fn = fn;
@@ -409,7 +409,7 @@ namespace Rondo.Core.Lib {
            _arity = 4;
        }
 
-       public void Invoke(T0 p0, T1 p1) {
+        public void Invoke(T0 p0, T1 p1) {
             switch (_arity) {
             case 0:
                 ((delegate*<T0,T1, void>)_fn)(p0,p1);
@@ -433,14 +433,14 @@ namespace Rondo.Core.Lib {
         }
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
     public readonly unsafe struct Cf<T0, T1, TR> {
-       private readonly void* _fn;
-       private readonly int _arity;
        private readonly void* _arg0;
-       private readonly void* _arg1;
-       private readonly void* _arg2;
-       private readonly void* _arg3;
+        private readonly void* _arg1;
+        private readonly void* _arg2;
+        private readonly void* _arg3;
+        private readonly int _arity;
+        private readonly void* _fn;
 
        public Cf(delegate*<T0,T1, TR> fn) {
            _fn = fn;
@@ -487,7 +487,7 @@ namespace Rondo.Core.Lib {
            _arity = 4;
        }
 
-       public TR Invoke(T0 p0, T1 p1) {
+        public TR Invoke(T0 p0, T1 p1) {
             switch (_arity) {
             case 0:
                 return ((delegate*<T0, T1, TR>)_fn)(p0, p1);
@@ -590,14 +590,14 @@ namespace Rondo.Core.Lib {
         }
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
     public readonly unsafe struct Ca<T0, T1, T2> {
-       private readonly void* _fn;
-       private readonly int _arity;
        private readonly void* _arg0;
-       private readonly void* _arg1;
-       private readonly void* _arg2;
-       private readonly void* _arg3;
+        private readonly void* _arg1;
+        private readonly void* _arg2;
+        private readonly void* _arg3;
+        private readonly int _arity;
+        private readonly void* _fn;
 
        public Ca(delegate*<T0,T1,T2, void> fn) {
            _fn = fn;
@@ -644,7 +644,7 @@ namespace Rondo.Core.Lib {
            _arity = 4;
        }
 
-       public void Invoke(T0 p0, T1 p1, T2 p2) {
+        public void Invoke(T0 p0, T1 p1, T2 p2) {
             switch (_arity) {
             case 0:
                 ((delegate*<T0,T1,T2, void>)_fn)(p0,p1,p2);
@@ -668,14 +668,14 @@ namespace Rondo.Core.Lib {
         }
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
     public readonly unsafe struct Cf<T0, T1, T2, TR> {
-       private readonly void* _fn;
-       private readonly int _arity;
        private readonly void* _arg0;
-       private readonly void* _arg1;
-       private readonly void* _arg2;
-       private readonly void* _arg3;
+        private readonly void* _arg1;
+        private readonly void* _arg2;
+        private readonly void* _arg3;
+        private readonly int _arity;
+        private readonly void* _fn;
 
        public Cf(delegate*<T0,T1,T2, TR> fn) {
            _fn = fn;
@@ -722,7 +722,7 @@ namespace Rondo.Core.Lib {
            _arity = 4;
        }
 
-       public TR Invoke(T0 p0, T1 p1, T2 p2) {
+        public TR Invoke(T0 p0, T1 p1, T2 p2) {
             switch (_arity) {
             case 0:
                 return ((delegate*<T0, T1, T2, TR>)_fn)(p0, p1, p2);
@@ -825,14 +825,14 @@ namespace Rondo.Core.Lib {
         }
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
     public readonly unsafe struct Ca<T0, T1, T2, T3> {
-       private readonly void* _fn;
-       private readonly int _arity;
        private readonly void* _arg0;
-       private readonly void* _arg1;
-       private readonly void* _arg2;
-       private readonly void* _arg3;
+        private readonly void* _arg1;
+        private readonly void* _arg2;
+        private readonly void* _arg3;
+        private readonly int _arity;
+        private readonly void* _fn;
 
        public Ca(delegate*<T0,T1,T2,T3, void> fn) {
            _fn = fn;
@@ -879,7 +879,7 @@ namespace Rondo.Core.Lib {
            _arity = 4;
        }
 
-       public void Invoke(T0 p0, T1 p1, T2 p2, T3 p3) {
+        public void Invoke(T0 p0, T1 p1, T2 p2, T3 p3) {
             switch (_arity) {
             case 0:
                 ((delegate*<T0,T1,T2,T3, void>)_fn)(p0,p1,p2,p3);
@@ -903,14 +903,14 @@ namespace Rondo.Core.Lib {
         }
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
     public readonly unsafe struct Cf<T0, T1, T2, T3, TR> {
-       private readonly void* _fn;
-       private readonly int _arity;
        private readonly void* _arg0;
-       private readonly void* _arg1;
-       private readonly void* _arg2;
-       private readonly void* _arg3;
+        private readonly void* _arg1;
+        private readonly void* _arg2;
+        private readonly void* _arg3;
+        private readonly int _arity;
+        private readonly void* _fn;
 
        public Cf(delegate*<T0,T1,T2,T3, TR> fn) {
            _fn = fn;
@@ -957,7 +957,7 @@ namespace Rondo.Core.Lib {
            _arity = 4;
        }
 
-       public TR Invoke(T0 p0, T1 p1, T2 p2, T3 p3) {
+        public TR Invoke(T0 p0, T1 p1, T2 p2, T3 p3) {
             switch (_arity) {
             case 0:
                 return ((delegate*<T0, T1, T2, T3, TR>)_fn)(p0, p1, p2, p3);

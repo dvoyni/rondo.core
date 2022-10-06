@@ -79,6 +79,23 @@ namespace Rondo.Core.Lib {
             return Mem.C.CopyPtr(msg);
         }
 
+        public static CLf<Ptr, Ptr> ToLPtrPtr<TIn, TOut>(delegate*<TIn, TOut> fn)
+                where TIn : unmanaged where TOut : unmanaged {
+            return CLf.New<Ptr, CLf<TIn, TOut>, Ptr>(&ToLPtrPtrCast, CLf.New(fn));
+        }
+
+        public static Cf<Ptr, Ptr> ToLPtrPtr<TIn, TOut>(CLf<TIn, TOut> fn)
+                where TIn : unmanaged where TOut : unmanaged {
+            return Cf.New<Ptr, CLf<TIn, TOut>, Ptr>(&ToLPtrPtrCast, fn);
+        }
+
+        private static Ptr ToLPtrPtrCast<TIn, TOut>(Ptr pIn, CLf<TIn, TOut>* fn)
+                where TIn : unmanaged where TOut : unmanaged {
+            Assert.That(pIn != Ptr.Null, "Null pointer cannot be dereferenced");
+            var msg = fn->Invoke(*(TIn*)pIn.Raw);
+            return Mem.C.CopyPtr(msg);
+        }
+
         public static S Join(S a, S b) {
             return (S)((string)a + (string)b);
         }

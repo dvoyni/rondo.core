@@ -1,8 +1,10 @@
 using System;
+using System.Runtime.InteropServices;
 using Rondo.Core.Extras;
 using Rondo.Core.Memory;
 
 namespace Rondo.Core.Lib.Containers {
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public readonly unsafe struct WithError<T> : IStringify where T : unmanaged {
         private readonly T _result;
         private readonly S _error;

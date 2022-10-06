@@ -15,7 +15,7 @@ namespace Rondo.Core.Extras {
             if (t.IsPrimitive || t.IsPointer || t.IsEnum) {
                 result = true;
             }
-            else if ( /*t.IsGenericType ||*/ !t.IsValueType) {
+            else if ( /*t.IsGenericType ||*/ !t.IsValueType || t.IsGenericParameter) {
                 result = false;
             }
             else {

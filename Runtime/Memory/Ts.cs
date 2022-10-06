@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace Rondo.Core.Memory {
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public readonly struct Ts : IEquatable<Ts>, IComparable<Ts> {
         private static readonly List<Type> _types = new() { null };
         private static readonly Dictionary<Type, Ts> _typeToHashed = new();

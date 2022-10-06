@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace Rondo.Core.Memory {
@@ -6,6 +8,13 @@ namespace Rondo.Core.Memory {
         public static Mem C { get; internal set; }
         public static Mem Prev { get; internal set; }
         private static ulong _lastId;
+        private static readonly Dictionary<Type, Dictionary<string, int>> _offsets = new();
+        private static readonly Dictionary<Type, int> _sizes = new();
+
+        internal static void __DomainReload() {
+            _offsets.Clear();
+            _sizes.Clear();
+        }
 
         private readonly RefHash _refs = new();
         private byte* _stack;
@@ -120,15 +129,63 @@ namespace Rondo.Core.Memory {
             C.Id = ++_lastId;
         }
 
-        public static int SizeOf(Type t) {
-            if (t.IsEnum) {
-                return SizeOf(t.GetEnumUnderlyingType());
+        public static int SizeOf(Type type) {
+            if (type.IsEnum) {
+                return SizeOf(type.GetEnumUnderlyingType());
             }
-            return Marshal.SizeOf(t);
+            /*if (_sizes.TryGetValue(type, out var sz)) {
+                //Assert.That(sz == Marshal.SizeOf(type), "Marshal.SizeOf mismatch");
+                return sz;
+            }
+
+            if (type.Name == "Void*") {
+                return SizeOf(typeof(IntPtr));
+            }
+
+            if (type.IsValueType && !type.IsEnum && !type.IsPrimitive) {
+                sz = 0;
+                var fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                foreach (var fi in fields) {
+                    sz += SizeOf(fi.FieldType);
+                }
+                _sizes[type] = sz;
+                
+
+                if (sz != Marshal.SizeOf(type)) {
+                    var x = $"Marshal.SizeOf({type}) mismatch";
+                }
+                return sz;
+            }*/
+
+            return Marshal.SizeOf(type);
         }
 
         public static int SizeOf<T>() where T : unmanaged {
-            return sizeof(T);
+            return sizeof(T);// SizeOf(typeof(T));
+            
+        }
+
+        public static int OffsetOf(Type type, string name) {
+           /* if (_offsets.TryGetValue(type, out var t)) {
+                if (t.TryGetValue(name, out var sz)) {
+                    if (sz != (int)Marshal.OffsetOf(type, name)) {
+                        var x = $"Marshal.OffsetOf({type}) mismatch";
+                    }
+                    return sz;
+                }
+            }*/
+            return (int)Marshal.OffsetOf(type, name);
+        }
+
+        public static void __RegisterOffsetOf<T>(string name, int offset) {
+            if (!_offsets.TryGetValue(typeof(T), out var t)) {
+                _offsets[typeof(T)] = t = new();
+            }
+            t[name] = offset;
+        }
+
+        public static void __RegisterSizeOf(Type t,int size) {
+            _sizes[t] = size;
         }
     }
 }

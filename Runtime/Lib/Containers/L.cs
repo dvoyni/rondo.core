@@ -1,13 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Rondo.Core.Memory;
 
 namespace Rondo.Core.Lib.Containers {
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public readonly unsafe struct L<T> : IEquatable<L<T>> where T : unmanaged {
         internal static readonly int ElementSize = Mem.SizeOf<T>();
-        internal readonly T* Data;
         internal readonly int Size;
+        internal readonly T* Data;
 
         internal L(T* data, int size) {
             size = Math.Max(0, size);

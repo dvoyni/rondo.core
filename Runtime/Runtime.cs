@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Rondo.Core.Extras;
 using Rondo.Core.Lib;
 using Rondo.Core.Lib.Containers;
@@ -20,16 +19,16 @@ namespace Rondo.Core {
         void Present(TScene scene);
     }
 
-    public delegate void PostMessage(L<Cf<Ptr, Ptr>> toMsg, Ptr result);
+    public delegate void PostMessage(CLf<Ptr, Ptr> toMsg, Ptr result);
 
     public unsafe class Runtime<TModel, TMsg, TScene> : IMessenger
             where TModel : unmanaged
             where TMsg : unmanaged
             where TScene : unmanaged {
         public struct Config : IDisposable {
-            public CLf<(TModel, L<Cmd<TMsg>>)> Init;
-            public CLf<TMsg, TModel, (TModel, L<Cmd<TMsg>>)> Update;
-            public CLf<TModel, L<Sub<TMsg>>> Subscribe;
+            public CLf<(TModel, L<Cmd>)> Init;
+            public CLf<TMsg, TModel, (TModel, L<Cmd>)> Update;
+            public CLf<TModel, L<Sub>> Subscribe;
             public CLf<TModel, TScene> View;
             public Maybe<CLa<Exception, TModel, TMsg>> Fail;
             public Maybe<CLa<TModel>> Reset;
@@ -49,7 +48,7 @@ namespace Rondo.Core {
         private readonly IPresenter<TScene> _presenter;
         private readonly List<TMsg> _messages = new();
         private readonly PostMessage _postMessageDelegate;
-        private L<Sub<TMsg>> _sub;
+        private L<Sub> _sub;
         private TModel _model;
         public TModel Model => _model;
 
@@ -65,7 +64,7 @@ namespace Rondo.Core {
         }
 
         public void Run() {
-            L<Cmd<TMsg>> cmds;
+            L<Cmd> cmds;
             (_model, cmds) = _config.Init.Invoke();
             ProcessCommand(cmds);
             ApplyMessages();
@@ -100,7 +99,7 @@ namespace Rondo.Core {
             for (var i = 0; i < _messages.Count; i++) {
                 var msg = _messages[i];
                 try {
-                    L<Cmd<TMsg>> cmds;
+                    L<Cmd> cmds;
                     (_model, cmds) = _config.Update.Invoke(msg, _model);
                     ProcessCommand(cmds);
                 }
@@ -124,11 +123,11 @@ namespace Rondo.Core {
             _messages.Add(msg);
         }
 
-        private void ProcessCommand(L<Cmd<TMsg>> cmds) {
+        private void ProcessCommand(L<Cmd> cmds) {
             var e = cmds.Enumerator;
             while (e.MoveNext()) {
                 var c = e.Current;
-                c.Exec.Invoke(c.Payload, c.ToMsg, _postMessageDelegate);
+                c.Exec(c.Payload, c.ToMsg, _postMessageDelegate);
             }
         }
 
@@ -158,8 +157,9 @@ namespace Rondo.Core {
             PushMessage(*msg.Cast<TMsg>());
         }
 
-        private void PostMessage(L<Cf<Ptr, Ptr>> toMsg, Ptr result) {
-            PostMessage(ChainCall(toMsg, result));
+        private void PostMessage(CLf<Ptr, Ptr> toMsg, Ptr result) {
+            PostMessage(toMsg.Invoke(result));
+            toMsg.Dispose();
         }
 
         public void TriggerSub<T>(T payload) where T : unmanaged {
@@ -169,7 +169,8 @@ namespace Rondo.Core {
             while (e.MoveNext()) {
                 var c = e.Current;
                 if (c.Type == th) {
-                    var maybeMsg = ChainCall(c.ToMsg, Mem.C.CopyPtr(payload)).Cast<Maybe<TMsg>>();
+                    var maybeMsg = c.ToMsg.Invoke(Mem.C.CopyPtr(payload)).Cast<Maybe<TMsg>>();
+                    c.ToMsg.Dispose();
                     if (maybeMsg->Test(out var msg)) {
                         PostMessage(msg);
                     }
@@ -179,14 +180,6 @@ namespace Rondo.Core {
             if (_messages.Count > 0) {
                 ApplyMessages();
             }
-        }
-
-        private static Ptr ChainCall(L<Cf<Ptr, Ptr>> chain, Ptr ptr) {
-            var e = chain.Enumerator;
-            while (e.MoveNext()) {
-                ptr = e.Current.Invoke(ptr);
-            }
-            return ptr;
         }
     }
 }

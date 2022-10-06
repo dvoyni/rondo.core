@@ -9,7 +9,7 @@ namespace Rondo.Core.Memory {
     public static unsafe partial class Serializer {
         private static readonly Dictionary<Type, Info> _infos = new();
 
-        public static void __DomainReload() {
+        internal static void __DomainReload() {
             _infos.Clear();
         }
 
@@ -129,13 +129,13 @@ namespace Rondo.Core.Memory {
                         type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                                 .Where(IsSerializable)
                                 .Select(fi => new CollectionField(
-                                    fi.Name, fi.FieldType, (int)Marshal.OffsetOf(type, fi.Name)
+                                    fi.Name, fi.FieldType, Mem.OffsetOf(type, fi.Name)
                                 ))
                                 .ToArray(),
                         type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                                 .Where(IsCollection)
                                 .Select(fi => new CollectionField(
-                                    fi.Name, fi.FieldType, (int)Marshal.OffsetOf(type, fi.Name)
+                                    fi.Name, fi.FieldType, Mem.OffsetOf(type, fi.Name)
                                 ))
                                 .ToArray()
                     );
@@ -164,7 +164,8 @@ namespace Rondo.Core.Memory {
             return fi.FieldType.IsPrimitive || fi.FieldType.IsEnum || IsCollection(fi);
         }
 
-        internal readonly struct Info {
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public readonly struct Info {
             // ReSharper disable once MemberHidesStaticFromOuterClass
             public readonly SerializeDelegate Serialize;
             // ReSharper disable once MemberHidesStaticFromOuterClass
@@ -193,7 +194,8 @@ namespace Rondo.Core.Memory {
             }
         }
 
-        internal readonly struct CollectionField {
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public readonly struct CollectionField {
             public readonly string Name;
             public readonly Type Type;
             public readonly int Offset;

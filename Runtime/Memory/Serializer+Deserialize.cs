@@ -4,7 +4,7 @@ using Rondo.Core.Lib.Containers;
 
 namespace Rondo.Core.Memory {
     public static unsafe partial class Serializer {
-        internal delegate void DeserializeDelegate(void* data, ref byte* buf, Info info);
+        public delegate void DeserializeDelegate(void* data, ref byte* buf, Info info);
 
         public static WithError<T> Deserialize<T>(byte* buf) where T : unmanaged {
             try {

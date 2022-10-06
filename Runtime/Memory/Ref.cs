@@ -1,6 +1,8 @@
 using System;
+using System.Runtime.InteropServices;
 
 namespace Rondo.Core.Memory {
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public readonly struct Ref : IEquatable<Ref> {
         private readonly int _hash;
 

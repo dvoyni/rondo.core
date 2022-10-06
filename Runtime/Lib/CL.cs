@@ -6,14 +6,14 @@ using Rondo.Core.Extras;
 using Rondo.Core.Memory;
 
 namespace Rondo.Core.Lib {
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
     public readonly unsafe struct CLf<TR> : IDisposable, IEquatable<CLf<TR>> {
-       private readonly void* _fn;
-       private readonly int _arity;
        private readonly IntPtr _arg0;
        private readonly IntPtr _arg1;
        private readonly IntPtr _arg2;
        private readonly IntPtr _arg3;
+       private readonly int _arity;
+       private readonly void* _fn;
 
        public CLf(delegate*<TR> fn) {
            _fn = fn;
@@ -162,14 +162,14 @@ namespace Rondo.Core.Lib {
         }
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
     public readonly unsafe struct CLa<T0> : IDisposable, IEquatable<CLa<T0>> {
-       private readonly void* _fn;
-       private readonly int _arity;
        private readonly IntPtr _arg0;
        private readonly IntPtr _arg1;
        private readonly IntPtr _arg2;
        private readonly IntPtr _arg3;
+       private readonly int _arity;
+       private readonly void* _fn;
 
        public CLa(delegate*<T0, void> fn) {
            _fn = fn;
@@ -261,14 +261,14 @@ namespace Rondo.Core.Lib {
         }
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
     public readonly unsafe struct CLf<T0, TR> : IDisposable, IEquatable<CLf<T0, TR>> {
-       private readonly void* _fn;
-       private readonly int _arity;
        private readonly IntPtr _arg0;
        private readonly IntPtr _arg1;
        private readonly IntPtr _arg2;
        private readonly IntPtr _arg3;
+       private readonly int _arity;
+       private readonly void* _fn;
 
        public CLf(delegate*<T0, TR> fn) {
            _fn = fn;
@@ -479,14 +479,14 @@ namespace Rondo.Core.Lib {
         }
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
     public readonly unsafe struct CLa<T0, T1> : IDisposable, IEquatable<CLa<T0, T1>> {
-       private readonly void* _fn;
-       private readonly int _arity;
        private readonly IntPtr _arg0;
        private readonly IntPtr _arg1;
        private readonly IntPtr _arg2;
        private readonly IntPtr _arg3;
+       private readonly int _arity;
+       private readonly void* _fn;
 
        public CLa(delegate*<T0,T1, void> fn) {
            _fn = fn;
@@ -578,14 +578,14 @@ namespace Rondo.Core.Lib {
         }
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
     public readonly unsafe struct CLf<T0, T1, TR> : IDisposable, IEquatable<CLf<T0, T1, TR>> {
-       private readonly void* _fn;
-       private readonly int _arity;
        private readonly IntPtr _arg0;
        private readonly IntPtr _arg1;
        private readonly IntPtr _arg2;
        private readonly IntPtr _arg3;
+       private readonly int _arity;
+       private readonly void* _fn;
 
        public CLf(delegate*<T0,T1, TR> fn) {
            _fn = fn;
@@ -796,14 +796,14 @@ namespace Rondo.Core.Lib {
         }
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
     public readonly unsafe struct CLa<T0, T1, T2> : IDisposable, IEquatable<CLa<T0, T1, T2>> {
-       private readonly void* _fn;
-       private readonly int _arity;
        private readonly IntPtr _arg0;
        private readonly IntPtr _arg1;
        private readonly IntPtr _arg2;
        private readonly IntPtr _arg3;
+       private readonly int _arity;
+       private readonly void* _fn;
 
        public CLa(delegate*<T0,T1,T2, void> fn) {
            _fn = fn;
@@ -895,14 +895,14 @@ namespace Rondo.Core.Lib {
         }
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
     public readonly unsafe struct CLf<T0, T1, T2, TR> : IDisposable, IEquatable<CLf<T0, T1, T2, TR>> {
-       private readonly void* _fn;
-       private readonly int _arity;
        private readonly IntPtr _arg0;
        private readonly IntPtr _arg1;
        private readonly IntPtr _arg2;
        private readonly IntPtr _arg3;
+       private readonly int _arity;
+       private readonly void* _fn;
 
        public CLf(delegate*<T0,T1,T2, TR> fn) {
            _fn = fn;
@@ -1113,14 +1113,14 @@ namespace Rondo.Core.Lib {
         }
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
     public readonly unsafe struct CLa<T0, T1, T2, T3> : IDisposable, IEquatable<CLa<T0, T1, T2, T3>> {
-       private readonly void* _fn;
-       private readonly int _arity;
        private readonly IntPtr _arg0;
        private readonly IntPtr _arg1;
        private readonly IntPtr _arg2;
        private readonly IntPtr _arg3;
+       private readonly int _arity;
+       private readonly void* _fn;
 
        public CLa(delegate*<T0,T1,T2,T3, void> fn) {
            _fn = fn;
@@ -1212,14 +1212,14 @@ namespace Rondo.Core.Lib {
         }
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
     public readonly unsafe struct CLf<T0, T1, T2, T3, TR> : IDisposable, IEquatable<CLf<T0, T1, T2, T3, TR>> {
-       private readonly void* _fn;
-       private readonly int _arity;
        private readonly IntPtr _arg0;
        private readonly IntPtr _arg1;
        private readonly IntPtr _arg2;
        private readonly IntPtr _arg3;
+       private readonly int _arity;
+       private readonly void* _fn;
 
        public CLf(delegate*<T0,T1,T2,T3, TR> fn) {
            _fn = fn;

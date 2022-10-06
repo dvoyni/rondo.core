@@ -3,7 +3,7 @@ using Rondo.Core.Lib.Containers;
 
 namespace Rondo.Core.Memory {
     public static unsafe partial class Serializer {
-        internal delegate void CloneDelegate(void* inData, void* outData, Info info);
+        public delegate void CloneDelegate(void* inData, void* outData, Info info);
 
         public static T Clone<T>(T data) where T : unmanaged {
             T result;

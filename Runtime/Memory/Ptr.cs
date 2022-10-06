@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using Rondo.Core.Extras;
 
 namespace Rondo.Core.Memory {
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public readonly unsafe struct Ptr : IEquatable<Ptr> {
         public static Ptr Null => new();
 

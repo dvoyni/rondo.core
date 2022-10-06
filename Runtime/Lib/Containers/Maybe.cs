@@ -3,11 +3,11 @@ using System.Runtime.InteropServices;
 using Rondo.Core.Memory;
 
 namespace Rondo.Core.Lib.Containers {
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public readonly unsafe struct Maybe<T> : IStringify where T : unmanaged {
-        private readonly bool _assigned;
         private readonly Ts _type;
         private readonly T _value;
+        private readonly bool _assigned;
 
         private Maybe(T value) {
             _assigned = true;

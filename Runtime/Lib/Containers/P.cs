@@ -1,4 +1,7 @@
+using System.Runtime.InteropServices;
+
 namespace Rondo.Core.Lib.Containers {
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public readonly struct P<TK, TV> where TK : unmanaged where TV : unmanaged {
         public readonly TK Key;
         public readonly TV Value;

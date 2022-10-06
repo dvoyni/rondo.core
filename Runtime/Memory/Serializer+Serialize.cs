@@ -1,10 +1,11 @@
 using System;
+using System.Runtime.InteropServices;
 using System.Text;
 using Rondo.Core.Lib.Containers;
 
 namespace Rondo.Core.Memory {
     public static unsafe partial class Serializer {
-        internal delegate int SerializeDelegate(void* data, ref byte* buf, Info info);
+        public delegate int SerializeDelegate(void* data, ref byte* buf, Info info);
 
         public static int Serialize<T>(T data, void* buffer) where T : unmanaged {
             var bytes = (byte*)buffer;
@@ -112,7 +113,8 @@ namespace Rondo.Core.Memory {
             return new DSerializeData(buf, size);
         }
 
-        private readonly struct DSerializeData {
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public readonly struct DSerializeData {
             public readonly byte* Buf;
             public readonly int Size;
 

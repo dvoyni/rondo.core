@@ -1,7 +1,9 @@
 using System;
+using System.Runtime.InteropServices;
 using Rondo.Core.Memory;
 
 namespace Rondo.Core.Lib.Containers {
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public readonly unsafe struct D<TK, TV>
             where TK : unmanaged, IComparable<TK> where TV : unmanaged {
         internal readonly L<P<TK, TV>> Data;
