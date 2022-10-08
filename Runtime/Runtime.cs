@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Rondo.Core.Extras;
 using Rondo.Core.Lib;
 using Rondo.Core.Lib.Containers;
@@ -169,7 +168,7 @@ namespace Rondo.Core {
             while (e.MoveNext()) {
                 var c = e.Current;
                 if (c.Type == th) {
-                    var maybeMsg = ChainCall(c.ToMsg, Mem.C.CopyPtr(payload)).Cast<Maybe<TMsg>>();
+                    var maybeMsg = c.ToMsg.Invoke(Mem.C.CopyPtr(payload)).Cast<Maybe<TMsg>>();
                     if (maybeMsg->Test(out var msg)) {
                         PostMessage(msg);
                     }
