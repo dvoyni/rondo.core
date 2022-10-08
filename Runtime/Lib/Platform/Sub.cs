@@ -2,26 +2,23 @@ using Rondo.Core.Lib.Containers;
 using Rondo.Core.Memory;
 
 namespace Rondo.Core.Lib.Platform {
-    public readonly struct Sub<TMsg> where TMsg : unmanaged {
+    public readonly unsafe struct Sub {
         internal readonly Ts Type;
         internal readonly Cf<Ptr, Ptr> ToMsg;
 
-        internal Sub(Ts type, Cf<Ptr, Ptr> toMsg) {
+        private Sub(Ts type, Cf<Ptr, Ptr> toMsg) {
             Type = type;
             ToMsg = toMsg;
         }
-    }
 
-    public static unsafe class Sub {
-        public static Sub<TMsg> New<TMsg, TEvent>(delegate*<TEvent, Maybe<TMsg>> toMsg)
+        public static Sub New<TMsg, TEvent>(delegate*<TEvent, Maybe<TMsg>> toMsg)
                 where TMsg : unmanaged
                 where TEvent : unmanaged {
-            return New<TMsg>((Ts)typeof(TEvent), F.ToPtrPtr(toMsg));
+            return New((Ts)typeof(TEvent), F.ToPtrPtr(toMsg));
         }
 
-        public static Sub<TMsg> New<TMsg>(Ts type, Cf<Ptr, Ptr> toMsg)
-                where TMsg : unmanaged {
-            return new Sub<TMsg>(type, toMsg);
+        public static Sub New(Ts type, Cf<Ptr, Ptr> toMsg) {
+            return new Sub(type, toMsg);
         }
     }
 }

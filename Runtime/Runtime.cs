@@ -28,7 +28,7 @@ namespace Rondo.Core {
         public struct Config : IDisposable {
             public CLf<(TModel, L<Cmd<TMsg>>)> Init;
             public CLf<TMsg, TModel, (TModel, L<Cmd<TMsg>>)> Update;
-            public CLf<TModel, L<Sub<TMsg>>> Subscribe;
+            public CLf<TModel, L<Sub>> Subscribe;
             public CLf<TModel, TScene> View;
             public Maybe<CLa<Exception, TModel, TMsg>> Fail;
             public Maybe<CLa<TModel>> Reset;
@@ -48,7 +48,7 @@ namespace Rondo.Core {
         private readonly IPresenter<TScene> _presenter;
         private readonly List<TMsg> _messages = new();
         private readonly PostMessage _postMessageDelegate;
-        private L<Sub<TMsg>> _sub;
+        private L<Sub> _sub;
         private TModel _model;
         public TModel Model => _model;
 
