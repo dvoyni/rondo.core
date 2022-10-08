@@ -19,7 +19,7 @@ namespace Rondo.Core {
         void Present(TScene scene);
     }
 
-    public delegate void PostMessage(Cf<Ptr, Ptr> toMsg, Ptr result);
+    public delegate void PostMessage(CLf<Ptr, Ptr> toMsg, Ptr result);
 
     public unsafe class Runtime<TModel, TMsg, TScene> : IMessenger
             where TModel : unmanaged
@@ -157,7 +157,7 @@ namespace Rondo.Core {
             PushMessage(*msg.Cast<TMsg>());
         }
 
-        private void PostMessage(Cf<Ptr, Ptr> toMsg, Ptr result) {
+        private void PostMessage(CLf<Ptr, Ptr> toMsg, Ptr result) {
             PostMessage(toMsg.Invoke(result));
         }
 
