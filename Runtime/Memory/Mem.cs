@@ -1,5 +1,5 @@
 using System;
-using System.Runtime.InteropServices;
+using System.Reflection;
 
 namespace Rondo.Core.Memory {
     public unsafe class Mem {
@@ -7,6 +7,7 @@ namespace Rondo.Core.Memory {
         public static Mem Prev { get; internal set; }
         private static ulong _lastId;
 
+        public static IMemManager Manager = new MemManager();
         private readonly RefHash _refs = new();
         private byte* _stack;
         private int _size;
@@ -21,7 +22,7 @@ namespace Rondo.Core.Memory {
 
         internal Mem(int size, ulong id = 0) {
             _size = size;
-            _stack = (byte*)Marshal.AllocHGlobal(_size);
+            _stack = (byte*)Manager.Alloc(_size);
             if (id == 0) {
                 Id = ++_lastId;
             }
@@ -41,7 +42,7 @@ namespace Rondo.Core.Memory {
 
         internal void Free() {
             if (_stack != null) {
-                Marshal.FreeHGlobal((IntPtr)_stack);
+                Manager.Free(_stack);
                 _stack = null;
             }
         }
@@ -56,8 +57,9 @@ namespace Rondo.Core.Memory {
         }
 
         public void Enlarge(int newSize) {
+            Free();
+            _stack = (byte*)Manager.Alloc(newSize);
             _size = newSize;
-            _stack = (byte*)Marshal.ReAllocHGlobal((IntPtr)_stack, (IntPtr)_size);
         }
 
         public T* Copy<T>(T source) where T : unmanaged {
@@ -68,21 +70,62 @@ namespace Rondo.Core.Memory {
             var ts = (Ts)typeof(T);
             var dataPtr = Alloc(ts.Size);
             var ptr = new Ptr(ts, dataPtr, Id);
-            Buffer.MemoryCopy(&source, dataPtr, ts.Size, ts.Size);
+            Manager.MemCpy(&source, dataPtr, ts.Size);
             return ptr;
         }
 
-        public Ptr CopyPtr(Ts type, IntPtr heapPtr) {
+        public Ptr CopyPtrFromOuterMemory(Ts type, IntPtr unmanagedPtr) {
             var dataPtr = Alloc(type.Size);
             var ptr = new Ptr(type, dataPtr, Id);
-            Buffer.MemoryCopy(heapPtr.ToPointer(), dataPtr, type.Size, type.Size);
+            Manager.MemCpy(unmanagedPtr.ToPointer(), dataPtr, type.Size);
             return ptr;
+        }
+
+        public static IntPtr AllocOuterMemory(long size) {
+            return new IntPtr(Manager.Alloc(size));
+        }
+
+        public static IntPtr AllocOuterMemoryAndCopy(void* src, long size) {
+            var dst = AllocOuterMemory(size);
+            Manager.MemCpy(src, dst.ToPointer(), size);
+            return dst;
+        }
+
+        public static void AllocAndCopyPtrToOuterMemory(Ptr src, ref IntPtr dst, ref int capacity, out Ts type) {
+            type = src.Type;
+
+            if (dst == null) {
+                capacity = type.Size;
+                dst = new IntPtr(Manager.Alloc(capacity));
+            }
+            else {
+                if (capacity < type.Size) {
+                    capacity = type.Size;
+                    Manager.Free(dst.ToPointer());
+                    dst = new IntPtr(Manager.Alloc(capacity));
+                }
+            }
+
+            Manager.MemCpy(src.Raw, dst.ToPointer(), type.Size);
+        }
+
+        public static void FreeOuterMemory(ref IntPtr mem) {
+            if (mem != IntPtr.Zero) {
+                Manager.Free(mem.ToPointer());
+                mem = IntPtr.Zero;
+            }
+        }
+
+        public static void FreeOuterMemory(IntPtr mem) {
+            if (mem != IntPtr.Zero) {
+                Manager.Free(mem.ToPointer());
+            }
         }
 
         public Ptr CopyPtr(byte* data, int size) {
             var dataPtr = Alloc(size);
             var ptr = new Ptr((Ts)typeof(byte*), dataPtr, Id);
-            Buffer.MemoryCopy(data, dataPtr, size, size);
+            Manager.MemCpy(data, dataPtr, size);
             return ptr;
         }
 
@@ -92,7 +135,7 @@ namespace Rondo.Core.Memory {
             }
             var dataPtr = Alloc(other.Type.Size);
             var ptr = new Ptr(other.Type, dataPtr, Id);
-            Buffer.MemoryCopy(other.Raw, dataPtr, other.Type.Size, other.Type.Size);
+            Manager.MemCpy(other.Raw, dataPtr, other.Type.Size);
             return ptr;
         }
 
@@ -121,14 +164,15 @@ namespace Rondo.Core.Memory {
         }
 
         public static int SizeOf(Type t) {
-            if (t.IsEnum) {
-                return SizeOf(t.GetEnumUnderlyingType());
-            }
-            return Marshal.SizeOf(t);
+            return Manager.SizeOf(t);
         }
 
         public static int SizeOf<T>() where T : unmanaged {
-            return sizeof(T);
+            return Manager.SizeOf<T>();
+        }
+
+        public static int OffsetOf(FieldInfo fi) {
+            return Manager.GetFieldOffset(fi);
         }
     }
 }

@@ -112,7 +112,7 @@ namespace Rondo.Core.Memory {
             return new DSerializeData(buf, size);
         }
 
-        private readonly struct DSerializeData {
+        public readonly struct DSerializeData {
             public readonly byte* Buf;
             public readonly int Size;
 

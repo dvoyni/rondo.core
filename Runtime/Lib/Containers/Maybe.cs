@@ -1,4 +1,3 @@
-using System;
 using System.Runtime.InteropServices;
 using Rondo.Core.Memory;
 
@@ -20,23 +19,10 @@ namespace Rondo.Core.Lib.Containers {
             return _assigned;
         }
 
-        public T ValueOrDefault => _assigned ? _value : default;
-
         public static Maybe<T> Nothing => new();
 
         public static Maybe<T> Just(T value) {
             return new Maybe<T>(value);
-        }
-
-        public Ptr PtrOrNull {
-            get {
-                if (!_assigned) {
-                    return Ptr.Null;
-                }
-                fixed (void* ptr = &_value) {
-                    return Mem.C.CopyPtr(_type, (IntPtr)ptr);
-                }
-            }
         }
 
         public TX Match<TX>(delegate*<T, TX> just, delegate*<TX> nothing) {

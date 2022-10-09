@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
+using Rondo.Core.Memory;
 
 namespace Rondo.Core.Extras {
     public static class TypeExtension {
@@ -11,18 +10,7 @@ namespace Rondo.Core.Extras {
             if (_cachedTypes.TryGetValue(t, out var result)) {
                 return result;
             }
-
-            if (t.IsPrimitive || t.IsPointer || t.IsEnum) {
-                result = true;
-            }
-            else if ( /*t.IsGenericType ||*/ !t.IsValueType) {
-                result = false;
-            }
-            else {
-                result = t.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                        .All(x => x.FieldType.IsUnmanaged());
-            }
-
+            result = Mem.Manager.IsUnmanaged(t);
             _cachedTypes.Add(t, result);
             return result;
         }

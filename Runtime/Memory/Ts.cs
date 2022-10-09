@@ -16,19 +16,22 @@ namespace Rondo.Core.Memory {
 
         public static explicit operator Ts(Type type) {
             if (!_typeToHashed.TryGetValue(type, out var th)) {
-                var size = 0;
-                try {
-                    size = Mem.SizeOf(type);
-                }
-                catch {
-                    // Don't need size for unmanaged types
-                }
+                var size = Mem.SizeOf(type);
                 th = new Ts(_types.Count, size);
 
                 _types.Add(type);
                 _typeToHashed.Add(type, th);
             }
 
+            return th;
+        }
+
+        public static Ts OfUnmanaged(Type type) {
+            if (!_typeToHashed.TryGetValue(type, out var th)) {
+                th = new Ts(_types.Count, 0);
+                _types.Add(type);
+                _typeToHashed.Add(type, th);
+            }
             return th;
         }
 

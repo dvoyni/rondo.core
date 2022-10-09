@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using Rondo.Core.Lib.Containers;
 
 namespace Rondo.Core.Memory {
@@ -129,13 +128,13 @@ namespace Rondo.Core.Memory {
                         type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                                 .Where(IsSerializable)
                                 .Select(fi => new CollectionField(
-                                    fi.Name, fi.FieldType, (int)Marshal.OffsetOf(type, fi.Name)
+                                    fi.Name, fi.FieldType, Mem.OffsetOf(fi)
                                 ))
                                 .ToArray(),
                         type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                                 .Where(IsCollection)
                                 .Select(fi => new CollectionField(
-                                    fi.Name, fi.FieldType, (int)Marshal.OffsetOf(type, fi.Name)
+                                    fi.Name, fi.FieldType, Mem.OffsetOf(fi)
                                 ))
                                 .ToArray()
                     );

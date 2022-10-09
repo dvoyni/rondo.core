@@ -1,6 +1,5 @@
 using System;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using Rondo.Core.Extras;
 
 namespace Rondo.Core.Memory {
@@ -47,22 +46,6 @@ namespace Rondo.Core.Memory {
             return false;
         }
 
-        public void CopyToHeap(ref IntPtr ptr, ref int capacity, out Ts type) {
-            type = _type;
-
-            if (ptr == IntPtr.Zero) {
-                capacity = _type.Size;
-                ptr = Marshal.AllocHGlobal(capacity);
-            }
-            else {
-                if (capacity < _type.Size) {
-                    capacity = _type.Size;
-                    ptr = Marshal.ReAllocHGlobal(ptr, (IntPtr)capacity);
-                }
-            }
-            Buffer.MemoryCopy(_data, ptr.ToPointer(), capacity, _type.Size);
-        }
-
         private static bool DeepEquals(Ptr a, Ptr b) {
             if (a._type != b._type) {
                 return false;
@@ -74,31 +57,7 @@ namespace Rondo.Core.Memory {
                 return false;
             }
 
-            var sz = a._type.Size - 8;
-
-            var i = 0;
-            var lx = (long*)a._data;
-            var ly = (long*)b._data;
-            for (; i <= sz; i += 8) {
-                if (*lx != *ly) {
-                    return false;
-                }
-                lx++;
-                ly++;
-            }
-
-            sz += 8;
-            var bx = (byte*)lx;
-            var by = (byte*)ly;
-            for (; i < sz; i++) {
-                if (*bx != *by) {
-                    return false;
-                }
-                bx++;
-                by++;
-            }
-
-            return true;
+            return Mem.Manager.MemCmp(a.Raw, b.Raw, a._type.Size);
         }
 
         public bool Equals(Ptr other) {
@@ -131,7 +90,7 @@ namespace Rondo.Core.Memory {
                     .GetMethod(nameof(DataToString), BindingFlags.NonPublic | BindingFlags.Instance)!
                     .MakeGenericMethod((Type)_type)
                     .Invoke(this, new object[] { });
-            return $"{nameof(Ptr)}(Type:{(Type)_type}, MemId:{_memId}, Ptr:{(IntPtr)_data}, Data:{data})";
+            return $"{nameof(Ptr)}(Type:{(Type)_type}, MemId:{_memId}, Ptr:{new IntPtr(_data)}, Data:{data})";
         }
 
         private string DataToString<T>() where T : unmanaged {
