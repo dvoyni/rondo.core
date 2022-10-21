@@ -41,6 +41,9 @@ namespace Rondo.Core {
                 if (Fail.Test(out var onFail)) {
                     onFail.Dispose();
                 }
+                if (Reset.Test(out var reset)) {
+                    reset.Dispose();
+                }
             }
         }
 
