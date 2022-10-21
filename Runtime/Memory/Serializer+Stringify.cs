@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using Rondo.Core.Lib.Containers;
 
@@ -60,14 +62,21 @@ namespace Rondo.Core.Memory {
                 }
             }
             if (type.IsEnum) {
-                //TODO: flags support
                 var sValue = Stringify(Enum.GetUnderlyingType(type), data, "");
                 var value = int.Parse(sValue);
-                var names = Enum.GetNames(type);
-                if (value < 0 || value >= names.Length) {
-                    return offset + "<Undefined>";
+                if (type.GetCustomAttributes(typeof(FlagsAttribute), true).Any()) {
+                    var values = Enum.GetValues(type);
+                    var parts = new List<string>();
+                    foreach (var v in values) {
+                        if ((value & (int)v) != 0) {
+                            parts.Add(Enum.GetName(type, v));
+                        }
+                    }
+                    return $"{offset} [{string.Join(" | ", parts)}]";
                 }
-                return offset + names[value];
+                else {
+                    return offset + Enum.GetName(type, value);
+                }
             }
 
             var info = GetInfo(type);
