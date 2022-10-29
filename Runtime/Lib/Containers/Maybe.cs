@@ -1,9 +1,11 @@
+using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Rondo.Core.Memory;
 
 namespace Rondo.Core.Lib.Containers {
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct Maybe<T> : IStringify where T : unmanaged {
+    public readonly unsafe struct Maybe<T> : IStringify, IEquatable<Maybe<T>> where T : unmanaged {
         private readonly bool _assigned;
         private readonly Ts _type;
         private readonly T _value;
@@ -38,11 +40,20 @@ namespace Rondo.Core.Lib.Containers {
             }
         }
 
+        public bool Equals(Maybe<T> other) {
+            if (_assigned != other._assigned) {
+                return false;
+            }
+
+            return EqualityComparer<T>.Default.Equals(_value, other._value);
+        }
+
         public string Stringify(string offset) {
             return Test(out var v) ? $"{offset}Just({v})" : $"{offset}Nothing";
         }
 
 #if DEBUG
+
         public override string ToString() {
             return Serializer.Stringify(this);
         }
