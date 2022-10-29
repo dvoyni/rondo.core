@@ -56,7 +56,7 @@ namespace Rondo.Core {
         public TModel Model => _model;
 
         public Runtime(Config config, IPresenter<TScene> presenter) {
-            const int initialMemorySize = 1024 * 1024 * 16;
+            const int initialMemorySize = 1024 * 1024 * 128;
 
             _config = config;
             _presenter = presenter;
@@ -107,7 +107,7 @@ namespace Rondo.Core {
                     ProcessCommands(cmds);
                 }
                 catch (MemoryLimitReachedException) {
-                    throw;
+                    throw; //TODO: crashes after resizing. problem in CLf?
                 }
                 catch (Exception ex) {
                     if (_config.Fail.Test(out var onFail)) {
