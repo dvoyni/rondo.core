@@ -8,13 +8,11 @@ namespace Rondo.Core.Memory {
 
         private readonly Ts _type;
         private readonly void* _data;
-        private readonly ulong _memId;
 
         public Ts Type => _type;
         public void* Raw => _data;
 
-        internal Ptr(Ts type, void* data, ulong memId) {
-            _memId = memId;
+        internal Ptr(Ts type, void* data) {
             _type = type;
             _data = data;
         }
@@ -25,7 +23,6 @@ namespace Rondo.Core.Memory {
             }
 
             Assert.That((Ts)typeof(T) == _type, "Trying to cast pointer to wrong type");
-            Assert.That((_memId == Mem.C.Id) || (_memId == Mem.Prev.Id), "Trying go cast expired pointer");
             return (T*)_data;
         }
 
@@ -35,7 +32,6 @@ namespace Rondo.Core.Memory {
                 return true;
             }
 
-            Assert.That((_memId == Mem.C.Id) || (_memId == Mem.C.Id), "Trying go cast expired pointer");
             var ts = (Ts)typeof(T);
             if (ts == _type) {
                 ptr = (T*)_data;
@@ -90,7 +86,7 @@ namespace Rondo.Core.Memory {
                     .GetMethod(nameof(DataToString), BindingFlags.NonPublic | BindingFlags.Instance)!
                     .MakeGenericMethod((Type)_type)
                     .Invoke(this, new object[] { });
-            return $"{nameof(Ptr)}(Type:{(Type)_type}, MemId:{_memId}, Ptr:{new IntPtr(_data)}, Data:{data})";
+            return $"{nameof(Ptr)}(Type:{(Type)_type}, Ptr:{new IntPtr(_data)}, Data:{data})";
         }
 
         private string DataToString<T>() where T : unmanaged {

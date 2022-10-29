@@ -47,6 +47,9 @@ namespace Rondo.Core {
             }
         }
 
+        private static Mem _currMem;
+        private static Mem _prevMem;
+
         private readonly Config _config;
         private readonly IPresenter<TScene> _presenter;
         private readonly List<TMsg> _messages = new();
@@ -56,14 +59,18 @@ namespace Rondo.Core {
         public TModel Model => _model;
 
         public Runtime(Config config, IPresenter<TScene> presenter) {
-            const int initialMemorySize = 1024 * 1024 * 128;
-
             _config = config;
             _presenter = presenter;
             _presenter.Messenger = this;
             _postMessageDelegate = PostMessage;
-            Mem.C = new Mem(initialMemorySize);
-            Mem.Prev = new Mem(initialMemorySize);
+            _currMem = Mem.C;
+            _prevMem = new Mem();
+        }
+
+        private static void Swap() {
+            (_prevMem, _currMem) = (_currMem, _prevMem);
+            _currMem.Clear();
+            Mem.C = _currMem;
         }
 
         public void Run() {
@@ -82,13 +89,13 @@ namespace Rondo.Core {
                 catch (MemoryLimitReachedException ex) {
                     var sz = Mem.C.Size;
                     while (sz < ex.RequiredSize) {
-                        sz *= 2;
+                        sz += 128 * 1024 * 1024;
                     }
                     var c = Mem.C;
-                    Mem.C = new Mem(sz, Mem.C.Id + 1);
+                    _currMem = Mem.C = new Mem(sz);
                     _model = Serializer.Clone(originalModel);
                     originalModel = _model;
-                    Mem.Prev.Enlarge(sz);
+                    _prevMem.Enlarge(sz);
                     c.Free();
                     continue;
                 }
@@ -97,7 +104,7 @@ namespace Rondo.Core {
         }
 
         private void ApplyMessagesUnsafe() {
-            Mem.Swap(); //TODO: Multiple Cmd will cause a memory loss, don't call ApplyMessages immediately
+            Swap(); //TODO: Multiple Cmd will cause a memory loss, don't call ApplyMessages immediately
 
             for (var i = 0; i < _messages.Count; i++) {
                 var msg = _messages[i];

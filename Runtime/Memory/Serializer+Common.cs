@@ -8,7 +8,7 @@ namespace Rondo.Core.Memory {
     public static unsafe partial class Serializer {
         private static readonly Dictionary<Type, Info> _infos = new();
 
-        public static void __DomainReload() {
+        internal static void __DomainReload() {
             _infos.Clear();
         }
 

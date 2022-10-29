@@ -1,11 +1,26 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
+using System.Threading;
 
 namespace Rondo.Core.Memory {
     public unsafe class Mem {
-        public static Mem C { get; internal set; }
-        public static Mem Prev { get; internal set; }
-        private static ulong _lastId;
+        internal static void __DomainReload() {
+            _localMemory.Clear();
+        }
+
+        private static readonly Dictionary<Thread, Mem> _localMemory = new();
+
+        public static Mem C {
+            get {
+                if (!_localMemory.TryGetValue(Thread.CurrentThread, out var mem)) {
+                    mem = new Mem();
+                    _localMemory[Thread.CurrentThread] = mem;
+                }
+                return mem;
+            }
+            internal set { _localMemory[Thread.CurrentThread] = value; }
+        }
 
         public static IMemManager Manager = new MemManager();
         private readonly RefHash _refs = new();
@@ -14,29 +29,18 @@ namespace Rondo.Core.Memory {
 
         private int _offset;
 
-        internal ulong Id { get; private set; }
-
         internal int Allocated => _offset;
         internal byte* Stack => _stack;
         internal int Size => _size;
 
-        internal Mem(int size, ulong id = 0) {
+        internal Mem(int size = 1025 * 1024 * 128) {
             _size = size;
             _stack = (byte*)Manager.Alloc(_size);
-            if (id == 0) {
-                Id = ++_lastId;
-            }
-            else {
-                Id = id;
-                if (_lastId < id) {
-                    _lastId = id;
-                }
-            }
         }
 
 #if DEBUG
         public override string ToString() {
-            return $"{nameof(Mem)}(Id:{Id}, Allocated:{_offset:N0}/{_size:N0})";
+            return $"{nameof(Mem)}(Allocated:{_offset:N0}/{_size:N0})";
         }
 #endif
 
@@ -69,16 +73,20 @@ namespace Rondo.Core.Memory {
         public Ptr CopyPtr<T>(T source) where T : unmanaged {
             var ts = (Ts)typeof(T);
             var dataPtr = Alloc(ts.Size);
-            var ptr = new Ptr(ts, dataPtr, Id);
+            var ptr = new Ptr(ts, dataPtr);
             Manager.MemCpy(&source, dataPtr, ts.Size);
             return ptr;
         }
 
         public Ptr CopyPtrFromOuterMemory(Ts type, IntPtr unmanagedPtr) {
-            var dataPtr = Alloc(type.Size);
-            var ptr = new Ptr(type, dataPtr, Id);
-            Manager.MemCpy(unmanagedPtr.ToPointer(), dataPtr, type.Size);
-            return ptr;
+            if (type.Size > 0) {
+                var dataPtr = Alloc(type.Size);
+                var ptr = new Ptr(type, dataPtr);
+                Manager.MemCpy(unmanagedPtr.ToPointer(), dataPtr, type.Size);
+                return ptr;
+            }
+            
+            return new Ptr(type, null);
         }
 
         public static IntPtr AllocOuterMemory(long size) {
@@ -116,15 +124,9 @@ namespace Rondo.Core.Memory {
             }
         }
 
-        public static void FreeOuterMemory(IntPtr mem) {
-            if (mem != IntPtr.Zero) {
-                Manager.Free(mem.ToPointer());
-            }
-        }
-
         public Ptr CopyPtr(byte* data, int size) {
             var dataPtr = Alloc(size);
-            var ptr = new Ptr((Ts)typeof(byte*), dataPtr, Id);
+            var ptr = new Ptr((Ts)typeof(byte*), dataPtr);
             Manager.MemCpy(data, dataPtr, size);
             return ptr;
         }
@@ -134,7 +136,7 @@ namespace Rondo.Core.Memory {
                 return Ptr.Null;
             }
             var dataPtr = Alloc(other.Type.Size);
-            var ptr = new Ptr(other.Type, dataPtr, Id);
+            var ptr = new Ptr(other.Type, dataPtr);
             Manager.MemCpy(other.Raw, dataPtr, other.Type.Size);
             return ptr;
         }
@@ -155,12 +157,6 @@ namespace Rondo.Core.Memory {
 
         public T GetObject<T>(Ref r) where T : class {
             return _refs.Get<T>(r);
-        }
-
-        public static void Swap() {
-            (Prev, C) = (C, Prev);
-            C.Clear();
-            C.Id = ++_lastId;
         }
 
         public static int SizeOf(Type t) {
