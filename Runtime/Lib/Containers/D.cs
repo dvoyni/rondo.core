@@ -4,53 +4,53 @@ using Rondo.Core.Memory;
 namespace Rondo.Core.Lib.Containers {
     public readonly unsafe struct D<TK, TV>
             where TK : unmanaged, IComparable<TK> where TV : unmanaged {
-        internal readonly L<P<TK, TV>> Data;
+        internal readonly A<P<TK, TV>> Data;
 
         internal D(D<TK, TV> other) {
-            Data = new L<P<TK, TV>>(other.Data);
+            Data = new A<P<TK, TV>>(other.Data);
         }
 
-        internal D(L<P<TK, TV>> data) {
+        internal D(A<P<TK, TV>> data) {
             Data = data;
         }
 
         public D(P<TK, TV> e0) {
-            Data = new L<P<TK, TV>>(e0);
+            Data = new A<P<TK, TV>>(e0);
         }
 
         public D(P<TK, TV> e0, P<TK, TV> e1) {
-            Data = new L<P<TK, TV>>(e0, e1).ToD().Data;
+            Data = new A<P<TK, TV>>(e0, e1).ToD().Data;
         }
 
         public D(P<TK, TV> e0, P<TK, TV> e1, P<TK, TV> e2) {
-            Data = new L<P<TK, TV>>(e0, e1, e2).ToD().Data;
+            Data = new A<P<TK, TV>>(e0, e1, e2).ToD().Data;
         }
 
         public D(P<TK, TV> e0, P<TK, TV> e1, P<TK, TV> e2, P<TK, TV> e3) {
-            Data = new L<P<TK, TV>>(e0, e1, e2, e3).ToD().Data;
+            Data = new A<P<TK, TV>>(e0, e1, e2, e3).ToD().Data;
         }
 
         public D(P<TK, TV> e0, P<TK, TV> e1, P<TK, TV> e2, P<TK, TV> e3, P<TK, TV> e4) {
-            Data = new L<P<TK, TV>>(e0, e1, e2, e3, e4).ToD().Data;
+            Data = new A<P<TK, TV>>(e0, e1, e2, e3, e4).ToD().Data;
         }
 
         public D(P<TK, TV> e0, P<TK, TV> e1, P<TK, TV> e2, P<TK, TV> e3, P<TK, TV> e4, P<TK, TV> e5) {
-            Data = new L<P<TK, TV>>(e0, e1, e2, e3, e4, e5).ToD().Data;
+            Data = new A<P<TK, TV>>(e0, e1, e2, e3, e4, e5).ToD().Data;
         }
 
         public D(P<TK, TV> e0, P<TK, TV> e1, P<TK, TV> e2, P<TK, TV> e3, P<TK, TV> e4, P<TK, TV> e5, P<TK, TV> e6) {
-            Data = new L<P<TK, TV>>(e0, e1, e2, e3, e4, e5, e6).ToD().Data;
+            Data = new A<P<TK, TV>>(e0, e1, e2, e3, e4, e5, e6).ToD().Data;
         }
 
         public D(P<TK, TV> e0, P<TK, TV> e1, P<TK, TV> e2, P<TK, TV> e3, P<TK, TV> e4, P<TK, TV> e5, P<TK, TV> e6, P<TK, TV> e7) {
-            Data = new L<P<TK, TV>>(e0, e1, e1, e2, e3, e4, e5, e6, e7).ToD().Data;
+            Data = new A<P<TK, TV>>(e0, e1, e1, e2, e3, e4, e5, e6, e7).ToD().Data;
         }
 
         public D(P<TK, TV> e0, P<TK, TV> e1, P<TK, TV> e2, P<TK, TV> e3, P<TK, TV> e4, P<TK, TV> e5, P<TK, TV> e6, P<TK, TV> e7, P<TK, TV> e8) {
-            Data = new L<P<TK, TV>>(e0, e1, e2, e3, e4, e5, e6, e7, e8).ToD().Data;
+            Data = new A<P<TK, TV>>(e0, e1, e2, e3, e4, e5, e6, e7, e8).ToD().Data;
         }
 
-        public L<P<TK, TV>>.E Enumerator => Data.Enumerator;
+        public A<P<TK, TV>>.E Enumerator => Data.Enumerator;
 
 #if DEBUG
         public override string ToString() {
@@ -182,7 +182,7 @@ namespace Rondo.Core.Lib.Containers {
         /// <summary>
         /// Get all of the keys in a dictionary, sorted from lowest to highest.
         /// </summary>
-        public static L<TK> Keys<TK, TV>(this D<TK, TV> dict)
+        public static A<TK> Keys<TK, TV>(this D<TK, TV> dict)
                 where TK : unmanaged, IComparable<TK> where TV : unmanaged {
             return dict.Data.Map(&P.Key);
         }
@@ -190,7 +190,7 @@ namespace Rondo.Core.Lib.Containers {
         /// <summary>
         /// Get all of the values in a dictionary, in the order of their keys.
         /// </summary>
-        public static L<TV> Values<TK, TV>(this D<TK, TV> dict)
+        public static A<TV> Values<TK, TV>(this D<TK, TV> dict)
                 where TK : unmanaged, IComparable<TK> where TV : unmanaged {
             return dict.Data.Map(&P.Value);
         }
@@ -198,20 +198,20 @@ namespace Rondo.Core.Lib.Containers {
         /// <summary>
         ///Convert a dictionary into an association list of key-value pairs, sorted by keys. 
         /// </summary>
-        public static L<P<TK, TV>> ToL<TK, TV>(this D<TK, TV> dict)
+        public static A<P<TK, TV>> ToL<TK, TV>(this D<TK, TV> dict)
                 where TK : unmanaged, IComparable<TK> where TV : unmanaged {
-            return new L<P<TK, TV>>(dict.Data);
+            return new A<P<TK, TV>>(dict.Data);
         }
 
         /// <summary>
         ///Convert a dictionary into an association list with given map function, sorted by keys. 
         /// </summary>
-        public static L<TR> ToLMap<TK, TV, TR>(this D<TK, TV> dict, delegate*<P<TK, TV>, TR> f)
+        public static A<TR> ToLMap<TK, TV, TR>(this D<TK, TV> dict, delegate*<P<TK, TV>, TR> f)
                 where TK : unmanaged, IComparable<TK> where TV : unmanaged where TR : unmanaged {
             return dict.ToLMap(Cf.New(f));
         }
 
-        public static L<TR> ToLMap<TK, TV, TR>(this D<TK, TV> dict, Cf<P<TK, TV>, TR> f)
+        public static A<TR> ToLMap<TK, TV, TR>(this D<TK, TV> dict, Cf<P<TK, TV>, TR> f)
                 where TK : unmanaged, IComparable<TK> where TV : unmanaged where TR : unmanaged {
             return dict.Data.Map(f);
         }
@@ -226,7 +226,7 @@ namespace Rondo.Core.Lib.Containers {
 
         public static D<TK, TB> Map<TK, TA, TB>(this D<TK, TA> dict, Cf<TK, TA, TB> f)
                 where TK : unmanaged, IComparable<TK> where TA : unmanaged where TB : unmanaged {
-            var list = new L<P<TK, TB>>(dict.Data.Size);
+            var list = new A<P<TK, TB>>(dict.Data.Size);
             var index = 0;
             var e = dict.Enumerator;
             while (e.MoveNext()) {
@@ -286,7 +286,7 @@ namespace Rondo.Core.Lib.Containers {
                     size++;
                 }
             }
-            var list = new L<P<TK, TV>>(size);
+            var list = new A<P<TK, TV>>(size);
             if (size > 0) {
                 var index = 0;
                 e.Reset();
@@ -319,8 +319,8 @@ namespace Rondo.Core.Lib.Containers {
                     size++;
                 }
             }
-            var a = new L<P<TK, TV>>(size);
-            var b = new L<P<TK, TV>>(dict.Data.Size - size);
+            var a = new A<P<TK, TV>>(size);
+            var b = new A<P<TK, TV>>(dict.Data.Size - size);
 
             var indexA = 0;
             var indexB = 0;
@@ -360,7 +360,7 @@ namespace Rondo.Core.Lib.Containers {
                 }
             }
 
-            var list = new L<P<TK, TV>>(cnt);
+            var list = new A<P<TK, TV>>(cnt);
             if (cnt > 0) {
                 e.Reset();
                 var index = 0;
@@ -388,7 +388,7 @@ namespace Rondo.Core.Lib.Containers {
                 }
             }
 
-            var list = new L<P<TK, TV>>(cnt);
+            var list = new A<P<TK, TV>>(cnt);
             if (cnt > 0) {
                 e.Reset();
                 var index = 0;

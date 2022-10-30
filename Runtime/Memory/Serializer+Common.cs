@@ -12,12 +12,12 @@ namespace Rondo.Core.Memory {
             _infos.Clear();
         }
 
-        public static void __ProduceGenericL<T>() where T : unmanaged {
+        public static void __ProduceGenericA<T>() where T : unmanaged {
             byte* buf = null;
-            __LSerialize<T>(null, ref buf, default);
-            __LDeserialize<T>(null, ref buf, default);
-            __LStringify<T>(null, default, "");
-            __LClone<T>(null, null, default);
+            __ASerialize<T>(null, ref buf, default);
+            __ADeserialize<T>(null, ref buf, default);
+            __AStringify<T>(null, default, "");
+            __AClone<T>(null, null, default);
         }
 
         public static void __ProduceGenericD<TK, TV>()
@@ -47,22 +47,22 @@ namespace Rondo.Core.Memory {
                 var collection = false;
                 if (type.IsGenericType) {
                     var genericType = type.GetGenericTypeDefinition();
-                    if (genericType == typeof(L<>)) {
+                    if (genericType == typeof(A<>)) {
                         ds = new(
                             (SerializeDelegate)typeof(Serializer)
-                                    .GetMethod(nameof(__LSerialize), BindingFlags.Static | BindingFlags.NonPublic)!
+                                    .GetMethod(nameof(__ASerialize), BindingFlags.Static | BindingFlags.NonPublic)!
                                     .MakeGenericMethod(type.GetGenericArguments())
                                     .CreateDelegate(typeof(SerializeDelegate)),
                             (DeserializeDelegate)typeof(Serializer)
-                                    .GetMethod(nameof(__LDeserialize), BindingFlags.Static | BindingFlags.NonPublic)!
+                                    .GetMethod(nameof(__ADeserialize), BindingFlags.Static | BindingFlags.NonPublic)!
                                     .MakeGenericMethod(type.GetGenericArguments())
                                     .CreateDelegate(typeof(DeserializeDelegate)),
                             (StringifyDelegate)typeof(Serializer)
-                                    .GetMethod(nameof(__LStringify), BindingFlags.Static | BindingFlags.NonPublic)!
+                                    .GetMethod(nameof(__AStringify), BindingFlags.Static | BindingFlags.NonPublic)!
                                     .MakeGenericMethod(type.GetGenericArguments())
                                     .CreateDelegate(typeof(StringifyDelegate)),
                             (CloneDelegate)typeof(Serializer)
-                                    .GetMethod(nameof(__LClone), BindingFlags.Static | BindingFlags.NonPublic)!
+                                    .GetMethod(nameof(__AClone), BindingFlags.Static | BindingFlags.NonPublic)!
                                     .MakeGenericMethod(type.GetGenericArguments())
                                     .CreateDelegate(typeof(CloneDelegate))
                         );
@@ -146,7 +146,7 @@ namespace Rondo.Core.Memory {
 
         private static bool IsCollection(FieldInfo fi) {
             if (fi.FieldType.IsGenericType) {
-                if (fi.FieldType.GetGenericTypeDefinition() == typeof(L<>)) {
+                if (fi.FieldType.GetGenericTypeDefinition() == typeof(A<>)) {
                     return true;
                 }
                 if (fi.FieldType.GetGenericTypeDefinition() == typeof(D<,>)) {

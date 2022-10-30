@@ -36,15 +36,15 @@ namespace Rondo.Core.Memory {
         }
 
         // ReSharper disable once UnusedParameter.Local
-        private static void __LDeserialize<T>(void* pL, ref byte* buf, Info _)
+        private static void __ADeserialize<T>(void* pL, ref byte* buf, Info _)
                 where T : unmanaged {
-            var l = new L<T>();
+            var l = new A<T>();
             while (BoolDeserialize(ref buf)) {
                 T value;
                 Deserialize(&value, ref buf);
                 l += value;
             }
-            *(L<T>*)pL = l;
+            *(A<T>*)pL = l;
         }
 
         // ReSharper disable once UnusedParameter.Local

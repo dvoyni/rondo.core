@@ -27,9 +27,9 @@ namespace Rondo.Core.Memory {
         }
 
         // ReSharper disable once UnusedParameter.Local
-        internal static void __LClone<T>(void* inL, void* outL, Info _)
+        internal static void __AClone<T>(void* inL, void* outL, Info _)
                 where T : unmanaged {
-            *(L<T>*)outL = new L<T>(((L<T>*)inL)->Map(&Clone));
+            *(A<T>*)outL = new A<T>(((A<T>*)inL)->Map(&Clone));
         }
 
         // ReSharper disable once UnusedParameter.Local

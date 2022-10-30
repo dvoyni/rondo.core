@@ -5,9 +5,9 @@ using Rondo.Core.Memory;
 
 namespace Rondo.Core.Cmds {
     public static unsafe class Time {
-        public static Cmd Now<TMsg>(CLf<DateTime, TMsg> toMsg)
+        public static Cmd Now<TMsg>(Xf<DateTime, TMsg> toMsg)
                 where TMsg : unmanaged {
-            static void Impl(Ptr pPayload, CLf<Ptr, Ptr> toMsg, PostMessage post) {
+            static void Impl(Ptr pPayload, Xf<Ptr, Ptr> toMsg, PostMessage post) {
                 post.Invoke(toMsg, pPayload);
                 toMsg.Dispose();
             }

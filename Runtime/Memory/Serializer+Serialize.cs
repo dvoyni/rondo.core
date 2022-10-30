@@ -30,10 +30,10 @@ namespace Rondo.Core.Memory {
         }
 
         // ReSharper disable once UnusedParameter.Local
-        private static int __LSerialize<T>(void* pL, ref byte* buf, Info _)
+        private static int __ASerialize<T>(void* pL, ref byte* buf, Info _)
                 where T : unmanaged {
             var size = 0;
-            var l = *(L<T>*)pL;
+            var l = *(A<T>*)pL;
             var e = l.Enumerator;
             while (e.MoveNext()) {
                 size += BoolSerialize(true, ref buf);

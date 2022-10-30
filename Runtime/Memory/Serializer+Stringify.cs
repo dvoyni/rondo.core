@@ -84,11 +84,11 @@ namespace Rondo.Core.Memory {
         }
 
         // ReSharper disable once UnusedParameter.Local
-        private static string __LStringify<T>(void* pL, Info _, string offset)
+        private static string __AStringify<T>(void* pL, Info _, string offset)
                 where T : unmanaged {
             StringBuilder sb = new();
             sb.Append(offset).Append("[");
-            var l = *(L<T>*)pL;
+            var l = *(A<T>*)pL;
             var e = l.Enumerator;
             var o = offset + StringifyTab;
             var first = true;

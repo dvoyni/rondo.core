@@ -20,19 +20,19 @@ namespace Rondo.Core {
         void Present(TScene scene);
     }
 
-    public delegate void PostMessage(CLf<Ptr, Ptr> toMsg, Ptr result);
+    public delegate void PostMessage(Xf<Ptr, Ptr> toMsg, Ptr result);
 
     public unsafe class Runtime<TModel, TMsg, TScene> : IMessenger
             where TModel : unmanaged
             where TMsg : unmanaged
             where TScene : unmanaged {
         public struct Config : IDisposable {
-            public CLf<(TModel, L<Cmd>)> Init;
-            public CLf<TMsg, TModel, (TModel, L<Cmd>)> Update;
-            public CLf<TModel, L<Sub>> Subscribe;
-            public CLf<TModel, TScene> View;
-            public Maybe<CLa<Exception, TModel, TMsg>> Fail;
-            public Maybe<CLa<TModel>> Reset;
+            public Xf<(TModel, A<Cmd>)> Init;
+            public Xf<TMsg, TModel, (TModel, A<Cmd>)> Update;
+            public Xf<TModel, A<Sub>> Subscribe;
+            public Xf<TModel, TScene> View;
+            public Maybe<Xa<Exception, TModel, TMsg>> Fail;
+            public Maybe<Xa<TModel>> Reset;
 
             public void Dispose() {
                 Init.Dispose();
@@ -55,7 +55,7 @@ namespace Rondo.Core {
         private readonly IPresenter<TScene> _presenter;
         private readonly List<TMsg> _messages = new();
         private readonly PostMessage _postMessageDelegate;
-        private L<Sub> _sub;
+        private A<Sub> _sub;
         private TModel _model;
         public TModel Model => _model;
 
@@ -75,7 +75,7 @@ namespace Rondo.Core {
         }
 
         public void Run() {
-            L<Cmd> cmds;
+            A<Cmd> cmds;
             (_model, cmds) = _config.Init.Invoke();
             ProcessCommands(cmds);
             ApplyMessages();
@@ -111,7 +111,7 @@ namespace Rondo.Core {
             for (var i = 0; i < _messages.Count; i++) {
                 var msg = _messages[i];
                 try {
-                    L<Cmd> cmds;
+                    A<Cmd> cmds;
                     (_model, cmds) = _config.Update.Invoke(msg, _model);
                     ProcessCommands(cmds);
                 }
@@ -135,7 +135,7 @@ namespace Rondo.Core {
             _messages.Add(msg);
         }
 
-        private void ProcessCommands(L<Cmd> cmds) {
+        private void ProcessCommands(A<Cmd> cmds) {
             var e = cmds.Enumerator;
             while (e.MoveNext()) {
                 var c = e.Current;
@@ -169,7 +169,7 @@ namespace Rondo.Core {
             PushMessage(*msg.Cast<TMsg>());
         }
 
-        private void PostMessage(CLf<Ptr, Ptr> toMsg, Ptr result) {
+        private void PostMessage(Xf<Ptr, Ptr> toMsg, Ptr result) {
             PostMessage(toMsg.Invoke(result));
         }
 
