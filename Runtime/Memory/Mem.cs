@@ -5,35 +5,47 @@ using System.Threading;
 
 namespace Rondo.Core.Memory {
     public unsafe class Mem {
+        public static long InitialSize = 128 * 1024 * 1024;
+        
         internal static void __DomainReload() {
             _localMemory.Clear();
         }
 
         private static readonly Dictionary<Thread, Mem> _localMemory = new();
 
-        public static Mem C {
-            get {
-                if (!_localMemory.TryGetValue(Thread.CurrentThread, out var mem)) {
-                    mem = new Mem();
-                    _localMemory[Thread.CurrentThread] = mem;
-                }
-                return mem;
+        public static Mem C => GetCurrent(Thread.CurrentThread);
+
+        public static Mem GetCurrent(Thread thread) {
+            if (!_localMemory.TryGetValue(thread, out var mem)) {
+                mem = new Mem(InitialSize);
+                _localMemory[thread] = mem;
             }
-            internal set { _localMemory[Thread.CurrentThread] = value; }
+            return mem;
+        }
+
+        public static void SetCurrent(Thread thread, Mem mem) {
+            _localMemory[thread] = mem;
+        }
+
+        public static void InitCurrent(Thread thread, long size) {
+            if (_localMemory.TryGetValue(thread, out var mem)) {
+                mem.Free();
+            }
+            _localMemory[thread] = new Mem(size);
         }
 
         public static IMemManager Manager = new MemManager();
         private readonly RefHash _refs = new();
         private byte* _stack;
-        private int _size;
+        private long _size;
 
         private int _offset;
 
         internal int Allocated => _offset;
         internal byte* Stack => _stack;
-        internal int Size => _size;
+        public long Size => _size;
 
-        internal Mem(int size = 1025 * 1024 * 128) {
+        internal Mem(long size) {
             _size = size;
             _stack = (byte*)Manager.Alloc(_size);
         }
@@ -60,7 +72,7 @@ namespace Rondo.Core.Memory {
             _refs.Clear();
         }
 
-        public void Enlarge(int newSize) {
+        public void Enlarge(long newSize) {
             Free();
             _stack = (byte*)Manager.Alloc(newSize);
             _size = newSize;
@@ -85,7 +97,7 @@ namespace Rondo.Core.Memory {
                 Manager.MemCpy(unmanagedPtr.ToPointer(), dataPtr, type.Size);
                 return ptr;
             }
-            
+
             return new Ptr(type, null);
         }
 

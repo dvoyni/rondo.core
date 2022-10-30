@@ -1,7 +1,7 @@
 using System;
 
 namespace Rondo.Core.Memory {
-    internal class MemoryLimitReachedException : Exception {
+    public class MemoryLimitReachedException : Exception {
         public readonly int RequiredSize;
 
         public MemoryLimitReachedException(int requiredSize) {

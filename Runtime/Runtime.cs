@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Rondo.Core.Extras;
 using Rondo.Core.Lib;
 using Rondo.Core.Lib.Containers;
@@ -64,13 +65,13 @@ namespace Rondo.Core {
             _presenter.Messenger = this;
             _postMessageDelegate = PostMessage;
             _currMem = Mem.C;
-            _prevMem = new Mem();
+            _prevMem = new Mem(Mem.InitialSize);
         }
 
         private static void Swap() {
             (_prevMem, _currMem) = (_currMem, _prevMem);
             _currMem.Clear();
-            Mem.C = _currMem;
+            Mem.SetCurrent(Thread.CurrentThread, _currMem);
         }
 
         public void Run() {
@@ -89,10 +90,11 @@ namespace Rondo.Core {
                 catch (MemoryLimitReachedException ex) {
                     var sz = Mem.C.Size;
                     while (sz < ex.RequiredSize) {
-                        sz += 128 * 1024 * 1024;
+                        sz += Mem.InitialSize;
                     }
                     var c = Mem.C;
-                    _currMem = Mem.C = new Mem(sz);
+                    _currMem = new Mem(sz);
+                    Mem.SetCurrent(Thread.CurrentThread, _currMem);
                     _model = Serializer.Clone(originalModel);
                     originalModel = _model;
                     _prevMem.Enlarge(sz);

@@ -6,10 +6,11 @@ namespace Rondo.Core.Memory {
     public static unsafe partial class Serializer {
         internal delegate void DeserializeDelegate(void* data, ref byte* buf, Info info);
 
-        public static WithError<T> Deserialize<T>(byte* buf) where T : unmanaged {
+        public static WithError<T> Deserialize<T>(void* buf) where T : unmanaged {
             try {
                 T value = default;
-                Deserialize(&value, ref buf);
+                var bytes = (byte*)buf;
+                Deserialize(&value, ref bytes);
                 return WithError<T>.Ok(value);
             }
             catch (Exception ex) {
