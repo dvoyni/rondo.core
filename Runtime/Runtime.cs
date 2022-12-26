@@ -1,195 +1,123 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
-using Rondo.Core.Extras;
 using Rondo.Core.Lib;
-using Rondo.Core.Lib.Containers;
-using Rondo.Core.Lib.Platform;
-using Rondo.Core.Memory;
 
 namespace Rondo.Core {
-    public interface IMessenger {
-        void PostMessage<TMsg>(TMsg msg) where TMsg : unmanaged;
-        void PostMessage(Ptr msg);
-        void TriggerSub<T>(T payload) where T : unmanaged;
+    public interface IMsg { }
+
+    public interface IModel { }
+
+    public interface IFlags { }
+
+    public interface ICmd {
+        void Execute(IMessageReceiver receiver);
+        ICmd Next { get; }
     }
 
-    public interface IPresenter<in TScene> : IDisposable
-            where TScene : unmanaged {
-        IMessenger Messenger { set; }
-        void Present(TScene scene);
+    public interface ISub {
+        bool CanHandle<T>();
+        IMsg HandleEvent<T>(T eventData);
     }
 
-    public delegate void PostMessage(Xf<Ptr, Ptr> toMsg, Ptr result);
+    public interface IMessageReceiver {
+        void PostMessage(IMsg msg);
+        void TriggerSub<T>(T eventData);
+    }
 
-    public unsafe class Runtime<TModel, TMsg, TScene> : IMessenger
-            where TModel : unmanaged
-            where TMsg : unmanaged
-            where TScene : unmanaged {
-        public struct Config : IDisposable {
-            public Xf<(TModel, A<Cmd>)> Init;
-            public Xf<TMsg, TModel, (TModel, A<Cmd>)> Update;
-            public Xf<TModel, A<Sub>> Subscribe;
-            public Xf<TModel, TScene> View;
-            public Maybe<Xa<Exception, TModel, TMsg>> Fail;
-            public Maybe<Xa<TModel>> Reset;
+    public interface IPresenter<TScene> {
+        void Present(TScene scene, IMessageReceiver messageReceiver);
+    }
 
-            public void Dispose() {
-                Init.Dispose();
-                Update.Dispose();
-                Subscribe.Dispose();
-                View.Dispose();
-                if (Fail.Test(out var onFail)) {
-                    onFail.Dispose();
-                }
-                if (Reset.Test(out var reset)) {
-                    reset.Dispose();
-                }
-            }
+    public class Runtime<TScene> : IMessageReceiver {
+        public delegate (IModel, ICmd) InitDelegate(IFlags flags);
+        public delegate (IModel, ICmd) UpdateDelegate(IMsg message, IModel model);
+        public delegate IEnumerable<ISub> SubscribeDelegate(IModel model);
+        public delegate TScene ViewDelegate(IModel model);
+
+        public struct Config {
+            public InitDelegate Init;
+            public UpdateDelegate Update;
+            public SubscribeDelegate Subscribe;
+            public ViewDelegate View;
         }
-
-        private static Mem _currMem;
-        private static Mem _prevMem;
 
         private readonly Config _config;
         private readonly IPresenter<TScene> _presenter;
-        private readonly List<TMsg> _messages = new();
-        private readonly PostMessage _postMessageDelegate;
-        private A<Sub> _sub;
-        private TModel _model;
-        public TModel Model => _model;
+        private readonly List<IMsg> _msgs = new();
+        private IReadOnlyCollection<ISub> _sub;
+        private IModel _model;
+        private bool _applyingMessages;
 
         public Runtime(Config config, IPresenter<TScene> presenter) {
+            if (IsMutable<IModel>()) {
+                throw new Exception($"Expected immutable data structure as {nameof(IModel)}");
+            }
+
             _config = config;
             _presenter = presenter;
-            _presenter.Messenger = this;
-            _postMessageDelegate = PostMessage;
-            _currMem = Mem.C;
-            _prevMem = new Mem(Mem.InitialSize);
         }
 
-        private static void Swap() {
-            (_prevMem, _currMem) = (_currMem, _prevMem);
-            _currMem.Clear();
-            Mem.SetCurrent(Thread.CurrentThread, _currMem);
-        }
-
-        public void Run() {
-            A<Cmd> cmds;
-            (_model, cmds) = _config.Init.Invoke();
-            ProcessCommands(cmds);
+        public void Run(IFlags flags) {
+            var (model, cmds) = _config.Init.Invoke(flags);
+            _model = model;
+            ProcessCommand(cmds);
             ApplyMessages();
         }
 
         private void ApplyMessages() {
-            var originalModel = _model;
-            while (true) {
-                try {
-                    ApplyMessagesUnsafe();
-                }
-                catch (MemoryLimitReachedException ex) {
-                    var sz = Mem.C.Size;
-                    while (sz < ex.RequiredSize) {
-                        sz += Mem.InitialSize;
-                    }
-                    var c = Mem.C;
-                    _currMem = new Mem(sz);
-                    Mem.SetCurrent(Thread.CurrentThread, _currMem);
-                    _model = Serializer.Clone(originalModel);
-                    originalModel = _model;
-                    _prevMem.Enlarge(sz);
-                    c.Free();
-                    continue;
-                }
-                break;
+            _applyingMessages = true;
+            for (var index = 0; index < _msgs.Count; index++) {
+                var msg = _msgs[index];
+                var (model, cmd) = _config.Update.Invoke(msg, _model);
+                _model = model;
+                ProcessCommand(cmd);
             }
-        }
+            _msgs.Clear();
+            _applyingMessages = false;
 
-        private void ApplyMessagesUnsafe() {
-            Swap(); //TODO: Multiple Cmd will cause a memory loss, don't call ApplyMessages immediately
-
-            for (var i = 0; i < _messages.Count; i++) {
-                var msg = _messages[i];
-                try {
-                    A<Cmd> cmds;
-                    (_model, cmds) = _config.Update.Invoke(msg, _model);
-                    ProcessCommands(cmds);
-                }
-                catch (MemoryLimitReachedException) {
-                    throw; //TODO: crashes after resizing. problem in CLf?
-                }
-                catch (Exception ex) {
-                    if (_config.Fail.Test(out var onFail)) {
-                        onFail.Invoke(ex, _model, msg);
-                    }
-                }
-            }
-
-            _model = Serializer.Clone(_model);
             Subscribe();
             Present();
-            _messages.Clear();
         }
 
-        private void PushMessage(TMsg msg) {
-            _messages.Add(msg);
+        private void PushMessage(IMsg msg) {
+            _msgs.Add(msg);
         }
 
-        private void ProcessCommands(A<Cmd> cmds) {
-            var e = cmds.Enumerator;
-            while (e.MoveNext()) {
-                var c = e.Current;
-                c.Exec.Invoke(c.Payload, c.ToMsg, _postMessageDelegate);
+        private void ProcessCommand(ICmd cmd) {
+            while (cmd != null) {
+                cmd.Execute(this);
+                cmd = cmd.Next;
             }
         }
 
         private void Subscribe() {
-            _sub = _config.Subscribe.Invoke(_model);
+            _sub = _config.Subscribe.Invoke(_model).ToArr();
         }
 
         private void Present() {
             var scene = _config.View.Invoke(_model);
-            _presenter.Present(scene);
+            _presenter.Present(scene, this);
         }
 
-        public void PostMessage<TPostMsg>(TPostMsg msg) where TPostMsg : unmanaged {
-            Assert.That(
-                typeof(TPostMsg) == typeof(TMsg),
-                $"Message should have {typeof(TMsg).FullName} type but has {typeof(TPostMsg).FullName}"
-            );
-            PushMessage(*(TMsg*)&msg);
-            ApplyMessages();
-        }
-
-        public void PostMessage(Ptr msg) {
-            Assert.That(
-                (Type)msg.Type == typeof(TMsg),
-                $"Message should have {typeof(TMsg).FullName} type but has {((Type)msg.Type).FullName}"
-            );
-            PushMessage(*msg.Cast<TMsg>());
-        }
-
-        private void PostMessage(Xf<Ptr, Ptr> toMsg, Ptr result) {
-            PostMessage(toMsg.Invoke(result));
-        }
-
-        public void TriggerSub<T>(T payload) where T : unmanaged {
-            var th = (Ts)typeof(T);
-
-            var e = _sub.Enumerator;
-            while (e.MoveNext()) {
-                var c = e.Current;
-                if (c.Type == th) {
-                    var maybeMsg = c.ToMsg.Invoke(Mem.C.CopyPtr(payload)).Cast<Maybe<TMsg>>();
-                    if (maybeMsg->Test(out var msg)) {
-                        PostMessage(msg);
-                    }
-                }
-            }
-
-            if (_messages.Count > 0) {
+        void IMessageReceiver.PostMessage(IMsg msg) {
+            PushMessage(msg);
+            if (!_applyingMessages) {
                 ApplyMessages();
             }
+        }
+
+        void IMessageReceiver.TriggerSub<T>(T payload) {
+            foreach (var sub in _sub) {
+                if (sub.CanHandle<T>()) {
+                    _msgs.Add(sub.HandleEvent(payload));
+                    ApplyMessages();
+                    break;
+                }
+            }
+        }
+
+        private static bool IsMutable<T>() {
+            return false; //todo:
         }
     }
 }

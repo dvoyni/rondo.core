@@ -1,7 +1,7 @@
 {
 	"name": "com.dvoyni.rondo.core",
-	"version": "0.2.0",
-	"description": "Main package with Rondo runtime, memory manager and base library",
+	"version": "0.3.0",
+	"description": "Main package with Rondo runtime and base library",
 	"displayName": "Rondo Core",
 	"unity": "2021.3",
 	"author": {
